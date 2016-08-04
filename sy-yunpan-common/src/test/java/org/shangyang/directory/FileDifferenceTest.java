@@ -118,11 +118,41 @@ public class FileDifferenceTest {
 		
 		List<FileAction> actions = differ.difference(sources, targets);
 		
+		Assert.assertTrue( actions.size() > 0 );
+		
 		for(FileAction action : actions ){
 			
 			System.out.println( action.getPath() + ", " + action.getAction() );
 			
 		}		
+	}
+	
+	/**
+	 * to uses my real directory for the testing
+	 */
+	@Test
+	public void testDifferencePressure(){
+		
+		File base1 = new File( "/Users/mac/Documents/OneDrive" ); 
+		
+		File base2 = new File( "/Volumes/Elements/百度云同步盘/OneDrive" );
+		
+		if( base2.exists() == false ){
+			return;
+		}
+		
+		List<FileDTO> sources = checker.check( base1 );
+		
+		List<FileDTO> targets = checker.check( base2 );
+		
+		List<FileAction> actions = differ.difference(sources, targets);
+		
+		for(FileAction action : actions ){
+			
+			System.out.println( action.getPath() + ", " + action.getAction() );
+			
+		}						
+		
 	}
 	
 	void createFile(String path, String content) throws IOException{
