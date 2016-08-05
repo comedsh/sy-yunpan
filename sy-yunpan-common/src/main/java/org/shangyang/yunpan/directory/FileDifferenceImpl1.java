@@ -1,4 +1,4 @@
-package org.shangyang.directory;
+package org.shangyang.yunpan.directory;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -21,6 +21,8 @@ public class FileDifferenceImpl1 implements IFileDifference{
 	 * 3. client 没有，server 有 -> action delete
 	 *    2.1 client 删除
 	 *    2.2 client 移动 
+	 * 
+	 * 什么时候初始化 FileAction 的时候用 source，什么时候用 target？INSERT, UPDATE 均用 SOURCE，因为需要同步 last modified, DELETE 用 TARGET，因为要删除 TARGET   
 	 *    
 	 */
 	public List<FileAction> difference( List<FileDTO> sources, List<FileDTO> targets ){
@@ -36,6 +38,14 @@ public class FileDifferenceImpl1 implements IFileDifference{
 		
 		for( FileDTO s : sources ){
 			
+			// special case for folder
+			if( s.isDirectory() ){
+				
+				actions.add( new FileAction( s, ActionEnum.DELETE ) ); // 直接删除服务器的子目录
+				
+				continue;
+			}
+			
 			boolean found = false;
 			
 			for( FileDTO t : targets ){
@@ -48,7 +58,7 @@ public class FileDifferenceImpl1 implements IFileDifference{
 					// 只有修改时间上不匹配的，认为有修改。这里，因为只考虑客户端覆盖服务器端的情况，所以，无论哪种情况，都直接覆盖之
 					if( Long.compare( s.getLastModified().getTime(), t.getLastModified().getTime() ) != 0 ){
 						
-						FileAction a = new FileAction( s.getPath(), ActionEnum.UPDATE );
+						FileAction a = new FileAction( s, ActionEnum.UPDATE );
 						
 						actions.add(a);
 						
@@ -62,10 +72,10 @@ public class FileDifferenceImpl1 implements IFileDifference{
 				
 			}
 			
-			if( found == true ) continue; // 找到了文件名匹配的文件，执行下一个操作。
+			if( found == true ) continue; // 找到了文件名匹配的文件，执行下一个。
 			
 			// resolved #2
-			actions.add( new FileAction( s.getPath(), ActionEnum.INSERT ) );
+			actions.add( new FileAction( s, ActionEnum.INSERT ) );
 			
 		}
 		
@@ -74,7 +84,7 @@ public class FileDifferenceImpl1 implements IFileDifference{
 		
 		for( FileDTO t : targets ){
 			
-			actions.add( new FileAction( t.getPath(), ActionEnum.DELETE ) );
+			actions.add( new FileAction( t, ActionEnum.DELETE ) );
 			
 		}		
 		

@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.shangyang.directory.FileAction;
-import org.shangyang.directory.FileDTO;
+import org.shangyang.yunpan.directory.FileAction;
+import org.shangyang.yunpan.directory.FileDTO;
 
 /**
  * 
@@ -17,10 +17,19 @@ public interface SyncServer {
 	public List<FileDTO> check();
 	
 	/**
-	 * for the very first version 1.0, just use the raw source file to do the action with server. 
+	 * @See SyncServerImpl1#sync
 	 * 
 	 * @param action
-	 * @param cache
+	 * @throws IOException
+	 */
+	public void sync( FileAction action ) throws IOException;
+	
+	/**
+	 * See the implementation
+	 * 
+	 * @param action
+	 * @param source
+	 * @throws IOException
 	 */
 	public void sync( FileAction action, File source ) throws IOException;
 	

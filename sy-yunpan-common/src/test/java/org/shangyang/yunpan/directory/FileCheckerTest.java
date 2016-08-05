@@ -1,4 +1,4 @@
-package org.shangyang.directory;
+package org.shangyang.yunpan.directory;
 
 import static org.junit.Assert.assertTrue;
 
@@ -39,7 +39,7 @@ public class FileCheckerTest {
 		
 		for( FileDTO f : files ){
 			
-			System.out.println( f.getPath() + "; " + new SimpleDateFormat("yyyy-MM-dd HH.mm.ss.dddddd").format( f.getLastModified() ) );
+			System.out.println( f.getRelativePath() + "; " + new SimpleDateFormat("yyyy-MM-dd HH.mm.ss.dddddd").format( f.getLastModified() ) );
 			
 		}
 		

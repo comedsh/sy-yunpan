@@ -1,4 +1,4 @@
-package org.shangyang.directory;
+package org.shangyang.yunpan.directory;
 
 import java.io.Serializable;
 
@@ -15,13 +15,13 @@ public class FileAction implements Serializable{
 
 	ActionEnum action;
 	
-	String path;
+	FileDTO file;
 
-	public FileAction(String path, ActionEnum action){
+	public FileAction(FileDTO file, ActionEnum action){
 		
 		this.action = action;
 		
-		this.path = path;
+		this.file = file;
 		
 	}
 	
@@ -33,14 +33,12 @@ public class FileAction implements Serializable{
 		this.action = action;
 	}
 
-	public String getPath() {
-		return path;
+	public FileDTO getFile() {
+		return file;
 	}
 
-	public void setPath(String path) {
-		this.path = path;
+	public void setFileDTO(FileDTO file) {
+		this.file = file;
 	}
-
-
 	
 }

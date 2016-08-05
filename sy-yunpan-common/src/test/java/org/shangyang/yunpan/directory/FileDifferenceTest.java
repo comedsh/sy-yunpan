@@ -1,4 +1,4 @@
-package org.shangyang.directory;
+package org.shangyang.yunpan.directory;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +11,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.shangyang.yunpan.directory.FileAction;
+import org.shangyang.yunpan.directory.FileChecker;
+import org.shangyang.yunpan.directory.FileDTO;
+import org.shangyang.yunpan.directory.IFileDifference;
 
 public class FileDifferenceTest {
 
@@ -77,7 +81,7 @@ public class FileDifferenceTest {
 		
 		for(FileAction action : actions ){
 			
-			System.out.println( action.getPath() + ", " + action.getAction() );
+			System.out.println( action.getFile() + ";;; " + action.getAction() );
 			
 		}		
 	}
@@ -104,7 +108,7 @@ public class FileDifferenceTest {
 		
 		for(FileAction action : actions ){
 			
-			System.out.println( action.getPath() + ", " + action.getAction() );
+			System.out.println( action.getFile() + ", " + action.getAction() );
 			
 		}						
 		

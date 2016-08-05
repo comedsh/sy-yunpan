@@ -1,4 +1,4 @@
-package org.shangyang.directory;
+package org.shangyang.yunpan.directory;
 
 import java.util.List;
 

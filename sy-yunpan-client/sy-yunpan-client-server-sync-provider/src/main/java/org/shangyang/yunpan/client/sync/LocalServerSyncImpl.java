@@ -2,7 +2,7 @@ package org.shangyang.yunpan.client.sync;
 
 import java.util.List;
 
-import org.shangyang.directory.FileDTO;
+import org.shangyang.yunpan.directory.FileDTO;
 
 /**
  * 

@@ -1,4 +1,4 @@
-package org.shangyang.directory;
+package org.shangyang.yunpan.directory;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,28 +12,31 @@ public class TestUtils {
 	/**
 	 * makes up the test scenarios for v1.0
 	 * 
-	 * -> base_dir1
-	 * 	  base_dir1/a/a.txt 'a' 
-	 *    base_dir1/a/b.txt	   -> insert ( to server )
-	 *    base_dir1/b/          -> insert ( to server ) 
-	 *    base_dir1/c/c.txt     -> insert ( to server )
-	 *    base_dir1/c/c1/c1.txt -> insert ( to server )
+	 * -> /dir1
+	 * 	  /dir1/a/a.txt 'a' 
+	 *    /dir1/a/b.txt	    -> insert ( to server )
+	 *    /dir1/b/          -> delete its sub directories ( to server ) | 叛逆者... 1. 需要判断是否是 target 的 parent folder，若是，则删除 target 的所有子目录。-> 这种情况最好单独处理，@see SyncServerImpl1#sync(FileAction action)
+	 *    /dir1/c/c.txt     -> insert ( to server )
+	 *    /dir1/c/c1/c1.txt -> insert ( to server )
+	 *    /dir1/d			-> insert
 	 * 
 	 * -> base_dir2
-	 *    base_dir2/a/a.txt 'aa' -> update
-	 *    base_dir2/a/c.txt 		-> delete
-	 *    base_dir2/b/b.txt 		-> delete
-	 *    base_dir2/c/c1/c2.txt  -> delete
+	 *    /dir2/a/a.txt 'aa' -> update
+	 *    /dir2/a/c.txt 	 -> delete
+	 *    /dir2/b/b.txt 	 -> delete
+	 *    /dir2/c/c1/c2.txt  -> delete
 	 * 	  	
 	 * -> All anticipate results to update the server side
-	 *    /a/a.txt  -> update
-	 *    /a/b/txt  -> insert
-	 *    /b/       -> insert
-	 *    /c/c.txt  -> insert
-	 *    /c/c1/c1.txt -> insert
-	 *    /a/c.txt  -> delete
-	 *    /b/b.txt  -> delete
-	 *    /c/c1/c2.txt -> delete    
+	 *    /a/a.txt  	-> update
+	 *    /a/b.txt  	-> insert
+	 *    /b/       	-> insert
+	 *    /c/c.txt  	-> insert
+	 *    /c/c1/c1.txt  -> insert
+	 *    /a/c.txt  	-> delete
+	 *    /b/b.txt 		-> delete
+	 *    /c/c1/c2.txt  -> delete
+	 *    /d			-> insert    
+	 *    
 	 * @throws Exception 
 	 * 
 	 */

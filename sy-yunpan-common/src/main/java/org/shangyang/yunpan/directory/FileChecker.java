@@ -1,4 +1,4 @@
-package org.shangyang.directory;
+package org.shangyang.yunpan.directory;
 
 import java.io.File;
 import java.util.Collections;
@@ -36,6 +36,8 @@ public class FileChecker {
 	 * 
 	 * 从当前 path 中检出目录结构信息; 
 	 * 
+	 * 返回结果只包含叶子节点信息，包含 Directory 叶子节点 和 File 叶子节点
+	 * 
 	 * @param the base path
 	 * @param path
 	 * @return the file structures that has the basepath prefix removed.
@@ -57,31 +59,30 @@ public class FileChecker {
 	}
 	
 	// 递归的检出文件目录结构
-	private void check(String basePath, File file, List<FileDTO> dtos) {
+	private void check(String basepath, File file, List<FileDTO> dtos) {
 
 		java.io.File[] fs = file.listFiles();
 
-		if (fs == null) {
+		if ( fs == null ) {
 			return;
 		}
 
 		for (java.io.File f : fs) {
 			
-			if (f.isFile()) {
+			if ( f.isFile() ) {
 				
-				dtos.add( new FileDTO( f.getPath().replaceAll(basePath, ""), new Date( f.lastModified() ) ) );
+				dtos.add( new FileDTO( FileDTO.toRelativePath(basepath, f.getAbsolutePath() ), new Date( f.lastModified() ), true ) );
 				
 			} else {
 				
 				// 注意了，如果是空目录，那么表示也是一个叶子节点，必须得添加，否则该目录结构不会被创建
 				if( f.listFiles().length == 0 ) {
 					
-					dtos.add( new FileDTO( f.getPath().replaceAll(basePath, ""), new Date( f.lastModified() ) ) );
+					dtos.add( new FileDTO( FileDTO.toRelativePath(basepath, f.getAbsolutePath() ), new Date( f.lastModified() ), false ) );
 					
-				}
-					
+				}					
 				
-				check(basePath, f, dtos );
+				check(basepath, f, dtos );
 				
 			}
 		}
