@@ -18,7 +18,7 @@ import org.junit.Assert;
  */
 public class FileChecker {
 
-	static FileChecker service = null;
+	private static FileChecker service = null;
 	
 	public static FileChecker getInstance(){
 		

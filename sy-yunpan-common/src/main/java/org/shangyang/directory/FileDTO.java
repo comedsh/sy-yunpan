@@ -57,5 +57,13 @@ public class FileDTO implements Comparable<FileDTO>, Serializable{
 		return this.getPath().compareTo(t.getPath());
 		
 	}
+
+	@Override
+	public String toString() {
+
+		return getPath()+"; "+ this.getLastModified().getTime() ;
+	}
+	
+	
 	
 }

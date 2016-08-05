@@ -2,4 +2,5 @@ include "sy-yunpan-common",
 		"sy-yunpan-client", 
 		"sy-yunpan-client:sy-yunpan-client-api", 
 		"sy-yunpan-client:sy-yunpan-client-server-sync-provider",
-		"sy-yunpan-server"
+		"sy-yunpan-server",
+		"sy-yunpan-server:sy-yunpan-server-api"

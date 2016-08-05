@@ -1,20 +1,29 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
+allprojects {
 
-sourceCompatibility = 1.7
-version = '1.0'
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'Gradle Quickstart',
-                   'Implementation-Version': version
+	apply plugin: 'java'
+	
+	apply plugin: 'eclipse'
+
+	sourceCompatibility = 1.7
+	
+	version = '1.0'
+	
+	jar {
+	    manifest {
+	        attributes 'Implementation-Title': 'Gradle Quickstart',
+	                   'Implementation-Version': version
+	    }
+	}
+
+    // group will translate to groupId during pom generation and deployment
+    group = 'org.shangyang.yunpan'
+
+    version = '1.0.0.SNAPSHOT'
+
+    // default set of maven repositories to be used when resolving dependencies
+    repositories {
+        mavenCentral()
     }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
 }
 
 test {
@@ -31,9 +40,18 @@ uploadArchives {
 
 subprojects{
 	
-	apply plugin: 'java'
-	apply plugin: 'eclipse'
-
-	sourceCompatibility = 1.7
+	dependencies{
+	
+		compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+		
+		compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+		
+		compile group: 'log4j', name: 'log4j', version: '1.2.17'
+		
+		testCompile group: 'junit', name: 'junit', version: '4.+'		
+	
+	}
 
 }
+
+

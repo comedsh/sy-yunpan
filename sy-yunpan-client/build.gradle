@@ -13,15 +13,10 @@ repositories {
 
 dependencies {
     
-    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
-    
-    compile project(':sy-yunpan-common')
-    
     compile project(':sy-yunpan-client:sy-yunpan-client-api')
     
     compile project(':sy-yunpan-client:sy-yunpan-client-server-sync-provider')
     
-    testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
 test {
@@ -34,4 +29,14 @@ uploadArchives {
            dirs 'repos'
        }
     }
+}
+
+subprojects{
+
+	dependencies{
+	
+		compile project(":sy-yunpan-common");
+	
+	}
+
 }
