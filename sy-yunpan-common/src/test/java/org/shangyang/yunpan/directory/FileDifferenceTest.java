@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,11 +15,11 @@ import org.junit.Test;
 import org.shangyang.yunpan.directory.FileAction;
 import org.shangyang.yunpan.directory.FileChecker;
 import org.shangyang.yunpan.directory.FileDTO;
-import org.shangyang.yunpan.directory.IFileDifference;
+import org.shangyang.yunpan.directory.FileDifference;
 
 public class FileDifferenceTest {
 
-	IFileDifference differ = ServiceLoader.load( IFileDifference.class ).iterator().next();
+	FileDifference differ = ServiceLoader.load( FileDifference.class ).iterator().next();
 	
 	FileChecker checker = FileChecker.getInstance();
 	
@@ -43,9 +44,9 @@ public class FileDifferenceTest {
 	@Before
 	public void before() throws Exception{
 		
-		TestUtils.cleanupTestCases0(rootpath);		
+		TestUtils.cleanupTestCases1(rootpath);		
 		
-		TestUtils.makeupTestCases0(rootpath);
+		TestUtils.makeupTestCases1(rootpath);
 		
 	}
 	
@@ -53,13 +54,13 @@ public class FileDifferenceTest {
 	 * difference with two same path. should return null
 	 */
 	@Test
-	public void testDifference0(){
+	public void testDifference10(){
 		
 		List<FileDTO> sources = checker.check( new File( basepath1 ) );
 		
 		List<FileDTO> targets = checker.check( new File( basepath1 ) );
 		
-		List<FileAction> actions = differ.difference(sources, targets);
+		List<FileAction> actions = differ.difference1(sources, targets);
 		
 		Assert.assertTrue( CollectionUtils.isEmpty( actions) );		
 		
@@ -69,22 +70,49 @@ public class FileDifferenceTest {
 	 * difference with two difference path, should return the differences. 
 	 */
 	@Test
-	public void testDifference1(){
+	public void testDifference11(){
 		
 		List<FileDTO> sources = checker.check( new File( basepath1 ) );
 		
 		List<FileDTO> targets = checker.check( new File( basepath2 ) );
 		
-		List<FileAction> actions = differ.difference(sources, targets);
+		List<FileAction> actions = differ.difference1(sources, targets);
 		
 		Assert.assertTrue( actions.size() > 0 );
 		
 		for(FileAction action : actions ){
 			
-			System.out.println( action.getFile() + ";;; " + action.getAction() );
+			System.out.println( action.toString() );
 			
 		}		
 	}
+
+	/**
+	 * slight difference with case #11, just make the file "/a/a.txt" causing the server to be updated. 
+	 * 
+	 * @throws InterruptedException 
+	 */
+	@Test
+	public void testDifference12() throws InterruptedException{
+		
+		List<FileDTO> sources = checker.check( new File( basepath1 ) );
+		
+		List<FileDTO> targets = checker.check( new File( basepath2 ) );
+		
+		TimeUnit.SECONDS.sleep(1);
+		
+		new File( rootpath + "/dir1/a/a.txt" ).setLastModified( System.currentTimeMillis() );
+		
+		List<FileAction> actions = differ.difference1(sources, targets);
+		
+		Assert.assertTrue( actions.size() > 0 );
+		
+		for(FileAction action : actions ){
+			
+			System.out.println( action.toString() );
+			
+		}		
+	}	
 	
 	/**
 	 * to uses my real directory for the testing
@@ -104,11 +132,11 @@ public class FileDifferenceTest {
 		
 		List<FileDTO> targets = checker.check( base2 );
 		
-		List<FileAction> actions = differ.difference(sources, targets);
+		List<FileAction> actions = differ.difference1(sources, targets);
 		
 		for(FileAction action : actions ){
 			
-			System.out.println( action.getFile() + ", " + action.getAction() );
+			System.out.println( action.toString() );
 			
 		}						
 		

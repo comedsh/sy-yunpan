@@ -39,9 +39,9 @@ public class SyncServerTest {
 		
 		basepath2 = rootpath + "/dir2/";
 		
-		TestUtils.cleanupTestCases0(rootpath);
+		TestUtils.cleanupTestCases1(rootpath);
 		
-		TestUtils.makeupTestCases0(rootpath);
+		TestUtils.makeupTestCases1(rootpath);
 		
 	}
 	

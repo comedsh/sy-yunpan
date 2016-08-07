@@ -71,7 +71,7 @@ public class FileDTO implements Comparable<FileDTO>, Serializable{
 	@Override
 	public boolean equals(Object t) {
 		
-		return StringUtils.equals(this.getRelativePath(), ( (FileDTO) t ).getRelativePath() );
+		return StringUtils.equals( this.getRelativePath(), ( (FileDTO) t ).getRelativePath() );
 	}
 
 	@Override

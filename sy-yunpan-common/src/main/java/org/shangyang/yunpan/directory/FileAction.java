@@ -15,11 +15,15 @@ public class FileAction implements Serializable{
 
 	ActionEnum action;
 	
+	TargetEnum target;
+	
 	FileDTO file;
 
-	public FileAction(FileDTO file, ActionEnum action){
+	public FileAction(FileDTO file, ActionEnum action, TargetEnum target){
 		
 		this.action = action;
+		
+		this.target = target;
 		
 		this.file = file;
 		
@@ -40,5 +44,20 @@ public class FileAction implements Serializable{
 	public void setFileDTO(FileDTO file) {
 		this.file = file;
 	}
+
+	public TargetEnum getTarget() {
+		return target;
+	}
+
+	public void setTarget(TargetEnum target) {
+		this.target = target;
+	}
+
+	@Override
+	public String toString() {
+
+		return this.file.toString() + "; " + action + " -> " + target;
+	}
+	
 	
 }

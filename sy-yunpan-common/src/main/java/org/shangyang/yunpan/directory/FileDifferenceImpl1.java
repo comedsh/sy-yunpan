@@ -11,21 +11,21 @@ import java.util.List;
  * @author 商洋
  *
  */
-public class FileDifferenceImpl1 implements IFileDifference{
+public class FileDifferenceImpl1 implements FileDifference{
 	
 	/**
-	 * 第一个版本，只通过 Client 往 Server 同步，只考虑单边的情况，所以，target -> Server
+	 * Initial Synchronization step, uses the server as the base snapshot to override the client.
 	 * 
-	 * 1. client 和 server 都有，比较 last update, 不相等 -> action update.
-	 * 2. client 有, server 没有 -> action paste
-	 * 3. client 没有，server 有 -> action delete
-	 *    2.1 client 删除
-	 *    2.2 client 移动 
+	 * 1. client 和 server 都有，比较 last update，... who less update him.
+	 * 2. client 有 server 没有，do nothing
+	 * 3. client 没有 server 有，覆盖 client
 	 * 
-	 * 什么时候初始化 FileAction 的时候用 source，什么时候用 target？INSERT, UPDATE 均用 SOURCE，因为需要同步 last modified, DELETE 用 TARGET，因为要删除 TARGET   
-	 *    
+	 * @param sources the file structure of client
+	 * @param targets the file structure of server
+	 * 
 	 */
-	public List<FileAction> difference( List<FileDTO> sources, List<FileDTO> targets ){
+	@Override
+	public List<FileAction> difference0(List<FileDTO> sources, List<FileDTO> targets) {
 		
 		Collections.sort(sources);
 		
@@ -38,13 +38,72 @@ public class FileDifferenceImpl1 implements IFileDifference{
 		
 		for( FileDTO s : sources ){
 			
-			// special case for folder
-			if( s.isDirectory() ){
+			for( FileDTO t : targets ){
+				// #1
+				if( s.equals(t) ){
+					
+					// why only update the client, see the Use Case diagram of comments #5
+					if( s.getLastModified().getTime() < t.getLastModified().getTime() ){
+						
+						FileAction a = new FileAction( t, ActionEnum.UPDATE, TargetEnum.CLIENT );
+						
+						actions.add( a );
+						
+					}
+					
+					temps.add( t );
+					
+					break;
+					
+				}
 				
-				actions.add( new FileAction( s, ActionEnum.DELETE ) ); // 直接删除服务器的子目录
-				
-				continue;
 			}
+			
+			// #2
+			
+		}
+		
+		// #3
+		targets.removeAll( temps );
+		
+		for( FileDTO t : targets ){
+			
+			actions.add( new FileAction( t, ActionEnum.INSERT, TargetEnum.CLIENT ) );
+			
+		}			
+		
+		return actions;
+	}	
+	
+	/**
+	 * Normal Synchronization step, uses the client as the base snapshot to override the server.
+	 * 
+	 * 1. client 和 server 都有，比较 last update, 
+	 *    1.1 client last update < server last update -> update client
+	 *    1.2 client last update > server last update -> update server 
+	 * 2. client 有 server 没有 -> action insert [server]
+	 * 3. client 没有 server 有 -> action delete [server]
+	 *    2.1 client 删除
+	 *    2.2 client 移动 
+	 *    
+	 * 注，构建 FileAction 的时候，TargetEnum 的取值取决于用谁的 last update timestamp   
+	 * 
+	 * @param sources the file structure of client
+	 * @param targets the file structure of server   
+	 *    
+	 */
+	public List<FileAction> difference1( List<FileDTO> sources, List<FileDTO> targets ){
+		
+		Collections.sort(sources);
+		
+		Collections.sort(targets);
+		
+		List<FileAction> actions = new LinkedList<FileAction>();
+		
+		// caches those common parts
+		List<FileDTO> temps = new LinkedList<FileDTO>();
+		
+		for( FileDTO s : sources ){
 			
 			boolean found = false;
 			
@@ -55,14 +114,9 @@ public class FileDifferenceImpl1 implements IFileDifference{
 					
 					found = true;
 					
-					// 只有修改时间上不匹配的，认为有修改。这里，因为只考虑客户端覆盖服务器端的情况，所以，无论哪种情况，都直接覆盖之
-					if( Long.compare( s.getLastModified().getTime(), t.getLastModified().getTime() ) != 0 ){
-						
-						FileAction a = new FileAction( s, ActionEnum.UPDATE );
-						
-						actions.add(a);
-						
-					}	
+					FileAction a = genUpdateAction( s, t);
+					
+					if( a != null ) actions.add(a);
 					
 					temps.add( t ); 
 					
@@ -72,10 +126,20 @@ public class FileDifferenceImpl1 implements IFileDifference{
 				
 			}
 			
-			if( found == true ) continue; // 找到了文件名匹配的文件，执行下一个。
+			if( found == true ) continue; // 找到了文件名匹配的文件，执行下一个。PS: 真希望 Java 有 GOTO
 			
-			// resolved #2
-			actions.add( new FileAction( s, ActionEnum.INSERT ) );
+			// special case for folder, if client only have a folder, that's not means insert into server but the deletion.
+			if( s.isDirectory() ){
+				
+				actions.add( new FileAction( s, ActionEnum.DELETE, TargetEnum.SERVER ) ); // 直接删除服务器的子目录
+				
+				continue;
+				
+			}else{
+			
+				// resolved #2
+				actions.add( new FileAction( s, ActionEnum.INSERT, TargetEnum.SERVER ) );
+			}
 			
 		}
 		
@@ -84,11 +148,32 @@ public class FileDifferenceImpl1 implements IFileDifference{
 		
 		for( FileDTO t : targets ){
 			
-			actions.add( new FileAction( t, ActionEnum.DELETE ) );
+			actions.add( new FileAction( t, ActionEnum.DELETE, TargetEnum.SERVER ) );
 			
 		}		
 		
 		return actions;
+	}
+	
+	private FileAction genUpdateAction( FileDTO s, FileDTO t ){
+		
+		FileAction a = null;
+		
+		int c = Long.compare( s.getLastModified().getTime(), t.getLastModified().getTime() );
+		
+		if( c < 0 ){
+			
+			a = new FileAction( t, ActionEnum.UPDATE, TargetEnum.CLIENT );
+			
+		}
+
+		if( c > 0 ){
+			
+			a = new FileAction( s, ActionEnum.UPDATE, TargetEnum.SERVER );
+			
+		}	
+		
+		return a;
 	}
 	
 }
