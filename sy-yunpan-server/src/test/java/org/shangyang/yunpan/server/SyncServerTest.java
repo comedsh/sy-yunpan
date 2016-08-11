@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.shangyang.yunpan.directory.ActionEnum;
 import org.shangyang.yunpan.directory.FileAction;
 import org.shangyang.yunpan.directory.FileDTO;
+import org.shangyang.yunpan.directory.TargetEnum;
 import org.shangyang.yunpan.directory.TestUtils;
 
 public class SyncServerTest {
@@ -60,7 +61,7 @@ public class SyncServerTest {
 	
 	/**
 	 * 0. folder
-	 *    /dir1/b/   -> 直接删除 服务器对应的子目录
+	 *    /dir1/b/   -> 覆盖删除 Server /dir1/b/ 中的所有内容
 	 * 
 	 * 1. update 
 	 *    /dir1/a/a.txt -> /dir2/a/a.txt
@@ -71,6 +72,7 @@ public class SyncServerTest {
 	 * 
 	 * 3. delete
 	 *    /dir2/c/c1/c2.txt
+	 *    
 	 * @throws IOException 
 	 * 
 	 */
@@ -85,7 +87,7 @@ public class SyncServerTest {
 		
 		assertTrue( source.exists() && source.isDirectory() );
 		
-		FileAction action = new FileAction( new FileDTO( "/b/", new Date( source.lastModified() ), false ), ActionEnum.INSERT );
+		FileAction action = new FileAction( new FileDTO( "/b/", new Date( source.lastModified() ), false ), ActionEnum.INSERT, TargetEnum.SERVER );
 		
 		server.sync( action ); // 单独同步文件夹
 		
@@ -109,7 +111,7 @@ public class SyncServerTest {
 		// last modified 不相等
 		assertTrue( source.lastModified() != target.lastModified() );
 		
-		action = new FileAction( new FileDTO( "/a/a.txt", new Date( source.lastModified() ), true ) , ActionEnum.UPDATE );
+		action = new FileAction( new FileDTO( "/a/a.txt", new Date( source.lastModified() ), true ) , ActionEnum.UPDATE, TargetEnum.SERVER );
 		
 		server.sync( action, source );
 		
@@ -124,7 +126,7 @@ public class SyncServerTest {
 		
 		assertTrue( source.exists() && source.isFile() );
 		
-		action = new FileAction( new FileDTO( "/c/c.txt", new Date( source.lastModified() ), true ), ActionEnum.INSERT );
+		action = new FileAction( new FileDTO( "/c/c.txt", new Date( source.lastModified() ), true ), ActionEnum.INSERT, TargetEnum.SERVER );
 		
 		server.sync( action, source );
 		
@@ -139,7 +141,7 @@ public class SyncServerTest {
 		
 		assertTrue( target.exists() && target.isFile() );
 		
-		action = new FileAction( new FileDTO( "/c/c1/c2.txt", null, true ), ActionEnum.DELETE );
+		action = new FileAction( new FileDTO( "/c/c1/c2.txt", null, true ), ActionEnum.DELETE, TargetEnum.SERVER );
 		
 		server.sync( action, null );
 		
