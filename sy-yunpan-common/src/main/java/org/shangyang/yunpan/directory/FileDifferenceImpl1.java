@@ -107,6 +107,8 @@ public class FileDifferenceImpl1 implements FileDifference{
 			
 			boolean found = false;
 			
+			boolean hasSubfolder = false;
+			
 			for( FileDTO t : targets ){
 				
 				// resolve #1
@@ -124,6 +126,18 @@ public class FileDifferenceImpl1 implements FileDifference{
 					
 				}
 				
+				if( s.isDirectory() ){
+				
+					if( s.getRelativePath().indexOf( t.getRelativePath() ) >= 0 ){
+						
+						hasSubfolder = true; 
+						
+						break;
+						
+					}
+						
+				}
+				
 			}
 			
 			if( found == true ) continue; // 找到了文件名匹配的文件，执行下一个。PS: 真希望 Java 有 GOTO
@@ -131,9 +145,14 @@ public class FileDifferenceImpl1 implements FileDifference{
 			// special case for folder, if client only have a folder, that's not means insert into server but the deletion.
 			if( s.isDirectory() ){
 				
-				actions.add( new FileAction( s, ActionEnum.DELETE, TargetEnum.SERVER ) ); // 直接删除服务器的子目录
+				if( hasSubfolder == true ){
 				
-				continue;
+					actions.add( new FileAction( s, ActionEnum.DELETE, TargetEnum.SERVER ) ); // 直接删除服务器的子目录
+
+				}else{
+					
+					actions.add( new FileAction( s, ActionEnum.INSERT, TargetEnum.SERVER ) );
+				}
 				
 			}else{
 			

@@ -17,7 +17,7 @@ import org.shangyang.yunpan.directory.FileChecker;
 import org.shangyang.yunpan.directory.FileDTO;
 import org.shangyang.yunpan.directory.FileDifference;
 
-public class FileDifferenceTest {
+public class FileDifferenceImpl1Test {
 
 	FileDifference differ = ServiceLoader.load( FileDifference.class ).iterator().next();
 	

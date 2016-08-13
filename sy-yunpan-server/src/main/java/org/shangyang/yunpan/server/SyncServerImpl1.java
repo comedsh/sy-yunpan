@@ -35,6 +35,8 @@ public class SyncServerImpl1 implements SyncServer {
 	 * 
 	 * 单独处理文件夹的情况，客户端传来一个叶子节点 Directory，那么，若服务器有这样的目录，直接将子目录删除
 	 * 
+	 * 第一期可以这么搞，只有一个客户端且只有一个服务器。
+	 * 
 	 * @param action
 	 * @throws IOException
 	 */

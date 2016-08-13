@@ -13,9 +13,7 @@ repositories {
 
 dependencies {
     
-    compile project(':sy-yunpan-client:sy-yunpan-client-api')
-    
-    compile project(':sy-yunpan-client:sy-yunpan-client-server-sync-provider')
+    compile project(':sy-yunpan-common')
     
 }
 
