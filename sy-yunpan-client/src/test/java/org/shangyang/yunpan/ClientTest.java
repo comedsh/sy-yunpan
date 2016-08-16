@@ -139,14 +139,6 @@ public class ClientTest {
 		
 	}
 	
-	@Test
-	public void testOther(){
-		
-		// 1471246807000
-		System.out.println( new File(basepath1+"/b/").lastModified() );
-		
-	}
-	
 	void setServerBasePath( SyncServer syncServer, String basepath ) throws Exception{
 		
 		ClassLoader cl = (ClassLoader) syncServer.getClass().getDeclaredMethod("getClassLoader").invoke(syncServer, (Object[])null );

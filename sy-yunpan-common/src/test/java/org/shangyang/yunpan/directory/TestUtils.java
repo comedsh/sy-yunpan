@@ -61,7 +61,7 @@ public class TestUtils {
 		createFile( rootpath + "/dir2/c/c1/c2.txt", null );
 		
 		// 因为 V0.1 不包含 Server update Client 的场景，所以修复测试用例。 让 /dir1/a/a.txt 更新 /dir2/a/a.txt
-		TimeUnit.MILLISECONDS.sleep(500);
+		TimeUnit.MILLISECONDS.sleep(1000);
 		
 		new File( rootpath + "/dir1/a/a.txt").setLastModified( System.currentTimeMillis() );
 		

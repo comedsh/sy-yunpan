@@ -1,9 +1,20 @@
-version = '1.0'
-
 jar {
     manifest {
         attributes 'Implementation-Title': 'Gradle Quickstart',
                    'Implementation-Version': version
+    }
+}
+
+// http://stackoverflow.com/questions/17709707/gradle-multi-project-distribution
+// 特别注意，如果要导出 sy-yunpan-server 中的相应内容，记得一定要先 build sy-yunpan-server 是它生成 /build/classes/main classes 文件.
+distributions {
+    main {
+        contents {
+		 	into('bin') {
+ 	           from { project(':sy-yunpan-server').buildDir.path + '/classes/main' }
+               fileMode = 0755
+            }
+         }
     }
 }
 
@@ -14,6 +25,8 @@ repositories {
 dependencies {
     
     compile project(':sy-yunpan-common')
+    
+    testCompile project(':sy-yunpan-common').sourceSets.test.output
     
     compile project(':sy-yunpan-server:sy-yunpan-server-api')
     

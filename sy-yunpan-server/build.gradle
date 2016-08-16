@@ -1,4 +1,4 @@
-version = '1.0'
+version = '0.0.1'
 
 jar {
     manifest {
@@ -13,10 +13,11 @@ repositories {
 
 dependencies {
     
-    compile project(':sy-yunpan-common')
+	compile project(':sy-yunpan-common')
     
+    testCompile project(':sy-yunpan-common').sourceSets.test.output
+        
     compile project(':sy-yunpan-server:sy-yunpan-server-api')
-
 }
 
 test {

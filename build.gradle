@@ -1,12 +1,16 @@
 allprojects {
-
 	apply plugin: 'java'
-	
 	apply plugin: 'eclipse'
+	apply plugin: 'application'
 
-	sourceCompatibility = 1.7
+	mainClassName = "org.shangyang.yunpan.client.Client"
 	
-	version = '1.0'
+	// group will translate to groupId during pom generation and deployment
+	group = 'org.shangyang.yunpan'
+
+	version = '0.0.1'
+	
+	sourceCompatibility = 1.7
 	
 	jar {
 	    manifest {
@@ -15,15 +19,11 @@ allprojects {
 	    }
 	}
 
-    // group will translate to groupId during pom generation and deployment
-    group = 'org.shangyang.yunpan'
-
-    version = '1.0.0.SNAPSHOT'
-
     // default set of maven repositories to be used when resolving dependencies
     repositories {
         mavenCentral()
     }
+    
 }
 
 test {
