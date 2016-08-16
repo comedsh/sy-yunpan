@@ -11,7 +11,7 @@ public class Log4JTest {
 		System.setProperty("logpath", "/Users/mac/Desktop");
 		
 		Logger logger = Logger.getLogger( SyncServerImpl1.class );
-		
+
 		logger.info("this is the info test message");
 		
 	}

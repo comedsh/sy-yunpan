@@ -26,7 +26,15 @@ public class SyncServerImpl1 implements SyncServer {
 	@Override
 	public List<FileDTO> check() {
 		
-		return FileChecker.getInstance().check( new File( Repository.getInstance().getSyncBase() ) );
+		long start = System.currentTimeMillis();
+		
+		logger.debug("start to check the server file system");
+		
+		List<FileDTO> files = FileChecker.getInstance().check( new File( Repository.getInstance().getSyncBase() ) );
+		
+		logger.debug("completed check the server file system, time spent " + ( System.currentTimeMillis() - start )/1000 +" seconds" );
+		
+		return files;
 	}
 	
 	/**

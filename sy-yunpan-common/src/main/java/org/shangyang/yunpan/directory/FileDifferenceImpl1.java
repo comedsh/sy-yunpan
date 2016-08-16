@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 /**
  * 
  * 第一个版本的实现，只考虑额 Client 同步 Server 端
@@ -12,6 +14,8 @@ import java.util.List;
  *
  */
 public class FileDifferenceImpl1 implements FileDifference{
+	
+	Logger logger = Logger.getLogger( FileDifferenceImpl1.class );
 	
 	/**
 	 * Normal Synchronization step, uses the client as the base snapshot to override the server.
@@ -28,20 +32,34 @@ public class FileDifferenceImpl1 implements FileDifference{
 	 * 
 	 * 注意，这个方法不具备幂等性，因为 targets 会通过 targets.removeAll(temps) 而发生改变。另外，sources 和 targets 的也会进行排序
 	 * 
+	 * 记录一次 performance tuning, 之前的做法是，通过 temps 缓存 sources 与 targets 两者匹配的文件，到最后再删除 remove temps 以后的 targets 的笨办法，结果导致这个方法每次都要执行5分钟左右，性能很差，
+	 * tuning的思路也很简单，不缓存而是直接 remove targets 与 sources 匹配的部分，剩下的就是 targets 需要 DELETE 的。之前的时间复杂度为 120K * n 既是 120K*n 的复杂度 (n 表示 t 循环多少次与 s 匹配，然后 break)，
+	 * 而现在为 n 始终为 1，所以复杂度为 120K*1，因为 s 和 t 经过排序的，t 每次都 remove 与 s 之前的匹配，所以 t 的下一个取值始终与 s 的下一个取值匹配 break，所以每次循环的复杂度为 1 了，整个复杂度就将为了 120K*1 了，
+	 * 提升了 n 倍的性能；从之前的 350秒左右提升到现在仅需要 11 秒的时间 提升了接近 30 倍的性能。
+	 * 
+	 * 
 	 * @param sources the file structure of client
 	 * @param targets the file structure of server   
 	 *    
 	 */
 	public List<FileAction> difference( List<FileDTO> sources, List<FileDTO> targets ){
 		
+		long start = System.currentTimeMillis();
+		
+		long free = Runtime.getRuntime().freeMemory();
+		
+		logger.debug("start difference check");
+		
 		Collections.sort(sources);
 		
 		Collections.sort(targets);
 		
+		logger.debug("time spent on collections sort from start " + ( System.currentTimeMillis() - start ) /1000 +" seconds" );
+		
 		List<FileAction> actions = new LinkedList<FileAction>();
 		
 		// caches those common parts
-		List<FileDTO> temps = new LinkedList<FileDTO>();
+		// List<FileDTO> temps = new LinkedList<FileDTO>();
 		
 		for( FileDTO s : sources ){
 			
@@ -67,15 +85,16 @@ public class FileDifferenceImpl1 implements FileDifference{
 						
 						// #2 means totally matches
 						
-						// means s found t. 
+						// if #1 and #2 cases that means found the matched t. 
 						found = true;
 						
-						temps.add( t );
+						// temps.add( t ); // why not directly remove it from targets for saving performance?
+						
+						targets.remove( t );
 						
 						break;
 						
 						// then how about #3, if s has more sub dirs than t, this is the normal cases, will handles via the common flows. 
-						
 					}				
 										
 				// resolve #1, if two file matches, compare with the status to decide the action needs to be took.
@@ -87,13 +106,12 @@ public class FileDifferenceImpl1 implements FileDifference{
 					
 					found = true;
 					
-					temps.add( t ); 
+					// temps.add( t ); // why not directly remove it from targets for saving performance?
+					
+					targets.remove( t );
 					
 					break;
-					
 				}
-				
-				
 				
 			}
 			
@@ -101,18 +119,21 @@ public class FileDifferenceImpl1 implements FileDifference{
 			
 			// resolved #2, s found no matches from Target, so insert case.
 			actions.add( new FileAction( s, ActionEnum.INSERT, TargetEnum.SERVER ) );
-			
-			
 		}
 		
-		// resolved #3
-		targets.removeAll( temps ); // temps 是 client 与 Server 共有的部分，server 移除这些共有的部分后，自然剩下的就是 Server 多余的部分了。
+		logger.debug("time spent on collections comparasion " + ( System.currentTimeMillis() - start ) /1000 +" seconds" );
+		
+		// resolved #3 -> performance tuning -> directly removed
+		// targets.removeAll( temps ); // temps 是 client 与 Server 共有的部分，server 移除这些共有的部分后，自然剩下的就是 Server 多余的部分了。
 		
 		for( FileDTO t : targets ){
 			
 			actions.add( new FileAction( t, ActionEnum.DELETE, TargetEnum.SERVER ) );
-			
 		}		
+		
+		
+		logger.debug("difference check completed, time spent "+ ( System.currentTimeMillis() - start )/1000 +" seconds,"
+				+ " and memory consumes " + ( free - Runtime.getRuntime().freeMemory() ) /1000/1000 +" M");
 		
 		return actions;
 	}

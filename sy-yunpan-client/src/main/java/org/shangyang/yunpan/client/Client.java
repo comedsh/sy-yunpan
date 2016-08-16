@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.shangyang.yunpan.directory.FileAction;
@@ -15,9 +14,24 @@ import org.shangyang.yunpan.directory.FileDifference;
 import org.shangyang.yunpan.directory.TargetEnum;
 import org.shangyang.yunpan.server.SyncServer;
 
+/**
+ * 
+ * 隐藏文件也需要同步，不过有些系统默认生成隐藏文件不应该被同步
+ * 
+ * @author 商洋
+ *
+ */
 public class Client {
 	
-	Logger logger = Logger.getLogger(Client.class);
+	static Logger logger = null;
+	
+	static{
+		
+		System.setProperty("logpath", "/Users/mac/Desktop" );  // so the log4j can dynamic read the ${logpath}
+		
+		logger = Logger.getLogger(Client.class); // Do notice that, Logger 如果想用系统环境变量作为参数值，必须在 System.setProperties 之后		
+		
+	}
 	
 	static Client c = null;
 	
@@ -33,8 +47,6 @@ public class Client {
 			
 			c = new Client();
 			
-			System.setProperty("logpath", "/Users/mac/Desktop" );  // so the log4j can dynamic read the ${logpath}
-			
 		}
 		
 		return c;
@@ -43,7 +55,15 @@ public class Client {
 	
 	public List<FileDTO> check(){
 		
-		return FileChecker.getInstance().check( new File( basePath ) );
+		long start = System.currentTimeMillis();
+		
+		logger.debug("start to check the client file system");
+		
+		List<FileDTO> files = FileChecker.getInstance().check( new File( basePath ) );
+		
+		logger.debug("completed check the client file system, time spent " + ( System.currentTimeMillis() - start )/1000 +" seconds" );
+		
+		return files;
 		
 	}
 	
@@ -54,6 +74,10 @@ public class Client {
 		List<FileDTO> snapshot2 = syncServer.check();
 		
 		List<FileAction> actions = differ.difference( snapshot1, snapshot2 );
+		
+		logger.debug("Totolly " + actions +" actions needs to process ");
+		
+		int number = 0;
 		
 		for( FileAction action : actions ){
 			
@@ -68,6 +92,9 @@ public class Client {
 				logger.warn("of the very first 0.1 version, no server update client scenario;" + action.toString() );
 				
 			}
+			
+			logger.debug("current processed "+ ( ++ number ) +" files." );
+			
 		}
 		
 	}
@@ -140,28 +167,55 @@ public class Client {
 
 	public static void main(String[] args){
 		
-		Timer timer = new Timer();
+//		Timer timer = new Timer();
+//		
+//		timer.schedule(new TimerTask(){
+//
+//			@Override
+//			public void run() {
+//				
+//				try {
+//					
+//					long start = System.currentTimeMillis(); 
+//					
+//					logger.debug("start sync");
+//					
+//					 Client.getInstance().sync();
+//					
+//					logger.debug("sync completed, current tiemstamp, time spent " + ( System.currentTimeMillis() - start ) / 1000 + " seconds ");
+//					
+//				} catch (Exception e) {
+//					
+//					e.printStackTrace();
+//				}
+//				
+//				
+//			}
+//			
+//		}, 1000, 1000 * 60 * 5); // 每隔五分钟执行一次，如果上一次的 scheduler 没有完成，则等待。shit，它是以上次开始执行的时间来计算的....
 		
-		timer.schedule(new TimerTask(){
-
-			@Override
-			public void run() {
+		while(true){
+			
+			try{
 				
-				Client client = new Client();
+				long start = System.currentTimeMillis(); 
 				
-				try {
-					
-					client.sync();
-					
-				} catch (Exception e) {
-					
-					e.printStackTrace();
-				}
+				logger.debug("start sync");
 				
+				 Client.getInstance().sync();
+				
+				logger.debug("sync completed, current tiemstamp, time spent " + ( System.currentTimeMillis() - start ) / 1000 + " seconds ");
+				
+				TimeUnit.SECONDS.sleep(300); // every 300 seconds executed once.
+				
+			}catch(Exception e){
+			
+				e.printStackTrace();
 				
 			}
-			
-		}, 1000, 1000 * 60 * 5); // 每隔五分钟执行一次，如果上一次的 scheduler 没有完成，则等待。
+		}
+		
+		
 		
 	}
 	
