@@ -47,7 +47,7 @@ public class Repository {
 		
 		if( StringUtils.isEmpty( getBasePath() ) ){
 		
-			basepath = read("basepath", Object.class.getResourceAsStream("/repository.properties"), "UTF-8");
+			basepath = read("basepath", this.getClass().getResourceAsStream("/repository.properties"), "UTF-8");
 
 		}else{
 			
@@ -55,15 +55,13 @@ public class Repository {
 			
 		}
 		
-		// System.setProperty("basepath", basepath); // so the log4j can dynamic read the ${basepath}
-		
 		return basepath;
 
 	}
 
 	public String getLogpath(){
 		
-		return read("logpath", Object.class.getResourceAsStream("/repository.properties"), "UTF-8" );
+		return read("logpath", this.getClass().getResourceAsStream("/repository.properties"), "UTF-8" );
 		
 	}
 	

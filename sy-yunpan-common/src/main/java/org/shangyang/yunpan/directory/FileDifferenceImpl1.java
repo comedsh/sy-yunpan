@@ -14,68 +14,6 @@ import java.util.List;
 public class FileDifferenceImpl1 implements FileDifference{
 	
 	/**
-	 * Initial Synchronization step, uses the server as the base snapshot to override the client.
-	 * 
-	 * 1. client 和 server 都有，比较 last update，... who less update him.
-	 * 2. client 有 server 没有，do nothing
-	 * 3. client 没有 server 有，覆盖 client
-	 * 
-	 * @param sources the file structure of client
-	 * @param targets the file structure of server
-	 * 
-	 */
-	@Override
-	public List<FileAction> difference0(List<FileDTO> sources, List<FileDTO> targets) {
-		
-		Collections.sort(sources);
-		
-		Collections.sort(targets);
-		
-		List<FileAction> actions = new LinkedList<FileAction>();
-		
-		// caches those common parts
-		List<FileDTO> temps = new LinkedList<FileDTO>();
-		
-		for( FileDTO s : sources ){
-			
-			for( FileDTO t : targets ){
-				// #1
-				if( s.equals(t) ){
-					
-					// why only update the client, see the Use Case diagram of comments #5
-					if( s.getLastModified().getTime() < t.getLastModified().getTime() ){
-						
-						FileAction a = new FileAction( t, ActionEnum.UPDATE, TargetEnum.CLIENT );
-						
-						actions.add( a );
-						
-					}
-					
-					temps.add( t );
-					
-					break;
-					
-				}
-				
-			}
-			
-			// #2
-			
-		}
-		
-		// #3
-		targets.removeAll( temps );
-		
-		for( FileDTO t : targets ){
-			
-			actions.add( new FileAction( t, ActionEnum.INSERT, TargetEnum.CLIENT ) );
-			
-		}			
-		
-		return actions;
-	}	
-	
-	/**
 	 * Normal Synchronization step, uses the client as the base snapshot to override the server.
 	 * 
 	 * 1. client 和 server 都有，比较 last update, 
@@ -88,11 +26,13 @@ public class FileDifferenceImpl1 implements FileDifference{
 	 *    
 	 * 注，构建 FileAction 的时候，TargetEnum 的取值取决于用谁的 last update timestamp   
 	 * 
+	 * 注意，这个方法不具备幂等性，因为 targets 会通过 targets.removeAll(temps) 而发生改变。另外，sources 和 targets 的也会进行排序
+	 * 
 	 * @param sources the file structure of client
 	 * @param targets the file structure of server   
 	 *    
 	 */
-	public List<FileAction> difference1( List<FileDTO> sources, List<FileDTO> targets ){
+	public List<FileAction> difference( List<FileDTO> sources, List<FileDTO> targets ){
 		
 		Collections.sort(sources);
 		
@@ -107,18 +47,45 @@ public class FileDifferenceImpl1 implements FileDifference{
 			
 			boolean found = false;
 			
-			boolean hasSubfolder = false;
-			
 			for( FileDTO t : targets ){
 				
-				// resolve #1
-				if( s.equals(t) ){
+				// special case for Directory only, 
+				// 1, if T is sub dir of S, then delete all the sub dirs. 
+				// 2. if totally matches, do nothing. 
+				// 3. if S is sub dir of T, insert s.  
+				if( s.isDirectory() ){
 					
-					found = true;
+					// handles #1 and #2 above
+					if( t.getRelativePath().startsWith( s.getRelativePath() ) ){
+						
+						// #1 indicates the current t dir has sub dirs against s
+						if( t.getRelativePath().replaceAll(s.getRelativePath(), "").length() > 0 ){
+						
+							actions.add( new FileAction( s, ActionEnum.DELETE, TargetEnum.SERVER ) );
+							
+						}
+						
+						// #2 means totally matches
+						
+						// means s found t. 
+						found = true;
+						
+						temps.add( t );
+						
+						break;
+						
+						// then how about #3, if s has more sub dirs than t, this is the normal cases, will handles via the common flows. 
+						
+					}				
+										
+				// resolve #1, if two file matches, compare with the status to decide the action needs to be took.
+				}else if( s.equals(t) ){
 					
 					FileAction a = genUpdateAction( s, t);
 					
 					if( a != null ) actions.add(a);
+					
+					found = true;
 					
 					temps.add( t ); 
 					
@@ -126,39 +93,15 @@ public class FileDifferenceImpl1 implements FileDifference{
 					
 				}
 				
-				if( s.isDirectory() ){
 				
-					if( s.getRelativePath().indexOf( t.getRelativePath() ) >= 0 ){
-						
-						hasSubfolder = true; 
-						
-						break;
-						
-					}
-						
-				}
 				
 			}
 			
 			if( found == true ) continue; // 找到了文件名匹配的文件，执行下一个。PS: 真希望 Java 有 GOTO
 			
-			// special case for folder, if client only have a folder, that's not means insert into server but the deletion.
-			if( s.isDirectory() ){
-				
-				if( hasSubfolder == true ){
-				
-					actions.add( new FileAction( s, ActionEnum.DELETE, TargetEnum.SERVER ) ); // 直接删除服务器的子目录
-
-				}else{
-					
-					actions.add( new FileAction( s, ActionEnum.INSERT, TargetEnum.SERVER ) );
-				}
-				
-			}else{
+			// resolved #2, s found no matches from Target, so insert case.
+			actions.add( new FileAction( s, ActionEnum.INSERT, TargetEnum.SERVER ) );
 			
-				// resolved #2
-				actions.add( new FileAction( s, ActionEnum.INSERT, TargetEnum.SERVER ) );
-			}
 			
 		}
 		
@@ -172,6 +115,62 @@ public class FileDifferenceImpl1 implements FileDifference{
 		}		
 		
 		return actions;
+	}
+	
+	/**
+	 * Resolves the Directory scenarios
+	 * 
+	 * case I, do nothing
+	 *   dir1/d1/
+	 *   dir2/d1/
+	 *   
+	 * case II, delete all the sub directories and files of dir2, but remain the d1  
+	 *   dir1/d1/
+	 *   dir1/d1/d2
+	 *   dir1/d1/d3/f1
+	 *   dir1/d1/d4/f2
+	 * 
+	 * case III, 
+	 * 
+	 *   dir1/d1/d2/d3/
+	 *   dir2/d1/d2/f2
+	 *   dir2/d1/d3
+	 *   
+	 * 
+	 * @param sources
+	 * @param targets
+	 * @return
+	 */
+	List<FileAction> difference0(List<FileDTO> sources, List<FileDTO> targets){
+		
+		List<FileAction> actions = new LinkedList<FileAction>();
+		
+		for( FileDTO s : sources ){
+			
+			for( FileDTO t : targets ){
+				
+				if( t.getRelativePath().startsWith( s.getRelativePath() ) ){
+					
+					// case II matched
+					if( t.getRelativePath().replaceAll( s.getRelativePath(), "" ).length() > 0 ){
+						
+						actions.add( ( new FileAction(s, ActionEnum.DELETE, TargetEnum.SERVER ) ) );
+						
+						break;
+						
+					}
+					
+				}
+				
+			}
+			
+			actions.add( new FileAction(s, ActionEnum.INSERT, TargetEnum.SERVER ) );
+			
+			
+		}
+		
+		return actions;
+		
 	}
 	
 	private FileAction genUpdateAction( FileDTO s, FileDTO t ){

@@ -9,7 +9,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -95,6 +97,26 @@ public class FileCommonTest {
         
         lock.release();       
         
+	}
+	
+	@Test
+	public void testDirectory() throws Exception{
+		
+		String filepath = StringUtils.removeEnd(new File(".").getCanonicalPath(), ".") + "/src/test/resources/dir1/d/";
+		
+		if( new File(filepath).exists() ) new File(filepath).delete();
+		
+		TestUtils.createFile(filepath, null);
+		
+		File dir = new File(filepath);
+		
+		System.out.println( dir.lastModified() );
+		
+		TimeUnit.MILLISECONDS.sleep( 500 );
+	
+		dir.setLastModified(System.currentTimeMillis() - 1000000 );
+		
+		System.out.println( dir.lastModified() );
 	}
 	
 }

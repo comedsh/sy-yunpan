@@ -60,7 +60,7 @@ public class FileDifferenceImpl1Test {
 		
 		List<FileDTO> targets = checker.check( new File( basepath1 ) );
 		
-		List<FileAction> actions = differ.difference1(sources, targets);
+		List<FileAction> actions = differ.difference(sources, targets);
 		
 		Assert.assertTrue( CollectionUtils.isEmpty( actions) );		
 		
@@ -76,7 +76,7 @@ public class FileDifferenceImpl1Test {
 		
 		List<FileDTO> targets = checker.check( new File( basepath2 ) );
 		
-		List<FileAction> actions = differ.difference1(sources, targets);
+		List<FileAction> actions = differ.difference(sources, targets);
 		
 		Assert.assertTrue( actions.size() > 0 );
 		
@@ -103,7 +103,7 @@ public class FileDifferenceImpl1Test {
 		
 		new File( rootpath + "/dir1/a/a.txt" ).setLastModified( System.currentTimeMillis() );
 		
-		List<FileAction> actions = differ.difference1(sources, targets);
+		List<FileAction> actions = differ.difference(sources, targets);
 		
 		Assert.assertTrue( actions.size() > 0 );
 		
@@ -132,7 +132,7 @@ public class FileDifferenceImpl1Test {
 		
 		List<FileDTO> targets = checker.check( base2 );
 		
-		List<FileAction> actions = differ.difference1(sources, targets);
+		List<FileAction> actions = differ.difference(sources, targets);
 		
 		for(FileAction action : actions ){
 			

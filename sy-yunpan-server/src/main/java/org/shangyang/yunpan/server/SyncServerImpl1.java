@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.junit.Assert;
 import org.shangyang.yunpan.directory.FileAction;
 import org.shangyang.yunpan.directory.FileChecker;
 import org.shangyang.yunpan.directory.FileDTO;
@@ -31,44 +30,10 @@ public class SyncServerImpl1 implements SyncServer {
 	}
 	
 	/**
-	 * v1.0
-	 * 
-	 * 单独处理文件夹的情况，客户端传来一个叶子节点 Directory，那么，若服务器有这样的目录，直接将子目录删除
-	 * 
-	 * 第一期可以这么搞，只有一个客户端且只有一个服务器。
-	 * 
-	 * @param action
-	 * @throws IOException
-	 */
-	@Override
-	public void sync(FileAction action) throws IOException {
-
-		Assert.assertTrue( action.getFile().isDirectory() );
-		
-		String basepath = Repository.getInstance().getSyncBase();
-		
-		File target = new File( basepath, action.getFile().getRelativePath() );
-		
-		if( target.exists() ){
-			
-			FileUtils.forceDelete( target ); // 会连同自己一起删除 
-			
-			FileUtils.forceMkdir( target ); // 所以这里补回来
-			
-			target.setLastModified( action.getFile().getLastModified().getTime() ); 
-			
-			logger.info( "file: "+ target.getAbsolutePath() + ", modified time: " + target.lastModified() +" get created" );
-			
-		}else{
-			
-			logger.info( "try delete directory: "+ action.getFile().getRelativePath() + " failed, because it is not existed");
-			
-		}
-		
-	}
-	
-	/**
 	 * for the very first version 1.0, just use the raw source file to do the action with server. 
+	 * 
+	 * FIXME 目前该方法的实现并没有考虑到并发的情况，乐观锁机制，以及并发更新的情况。
+	 * 
 	 * 
 	 * @param action
 	 * @param cache
@@ -76,11 +41,11 @@ public class SyncServerImpl1 implements SyncServer {
 	@Override
 	public void sync( FileAction action, File source ) throws IOException {
 		
-		Assert.assertTrue( action.getFile().isFile() );
+		// Assert.assertTrue( action.getFile().isFile() );
 		
 		String basepath = Repository.getInstance().getSyncBase();
 		
-		// 通过合并两个路径生成一个新的文件
+		// 声明 Server 上所对应的文件
 		File target = new File( basepath, action.getFile().getRelativePath() );
 		
 		switch ( action.getAction() ){
@@ -103,7 +68,7 @@ public class SyncServerImpl1 implements SyncServer {
 				
 			case UPDATE:	
 				
-				FileUtils.copyFile(source, target); // will override
+				FileUtils.copyFile(source, target); // will override 
 				
 				target.setLastModified( action.getFile().getLastModified().getTime() ); // 服务器是不应该直接能够获取客户端的源文件的，所以，其实应该这样操作。-> 只是留个注脚。
 				
@@ -113,7 +78,11 @@ public class SyncServerImpl1 implements SyncServer {
 				
 			case INSERT:
 				
-				FileUtils.copyFile(source, target);
+				if( source.isFile() )
+					FileUtils.copyFile( source, target );
+				
+				if( source.isDirectory() )
+					FileUtils.forceMkdir( target );
 				
 				target.setLastModified( action.getFile().getLastModified().getTime() );
 				

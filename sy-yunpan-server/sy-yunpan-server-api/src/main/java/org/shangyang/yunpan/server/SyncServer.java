@@ -17,14 +17,6 @@ public interface SyncServer {
 	public List<FileDTO> check();
 	
 	/**
-	 * @See SyncServerImpl1#sync
-	 * 
-	 * @param action
-	 * @throws IOException
-	 */
-	public void sync( FileAction action ) throws IOException;
-	
-	/**
 	 * See the implementation
 	 * 
 	 * @param action

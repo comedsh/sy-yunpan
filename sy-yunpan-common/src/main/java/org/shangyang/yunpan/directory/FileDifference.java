@@ -12,16 +12,6 @@ public interface FileDifference {
 	
 	/**
 	 * 
-	 * 比较两个文件目录结构，并生成 Initial Sync 需要执行的 FileAction，
-	 * 
-	 * @param sources
-	 * @param targets
-	 * @return
-	 */
-	public List<FileAction> difference0( List<FileDTO> sources, List<FileDTO> targets );
-	
-	/**
-	 * 
 	 * 比较两个文件目录结构，并生成 Normal Sync 需要执行的 FileAction，
 	 * 
 	 * 
@@ -30,6 +20,6 @@ public interface FileDifference {
 	 * 
 	 * @return
 	 */
-	public List<FileAction> difference1( List<FileDTO> sources, List<FileDTO> targets );
+	public List<FileAction> difference( List<FileDTO> sources, List<FileDTO> targets );
 	
 }

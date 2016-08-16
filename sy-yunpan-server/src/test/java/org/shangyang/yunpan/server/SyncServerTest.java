@@ -89,7 +89,7 @@ public class SyncServerTest {
 		
 		FileAction action = new FileAction( new FileDTO( "/b/", new Date( source.lastModified() ), false ), ActionEnum.INSERT, TargetEnum.SERVER );
 		
-		server.sync( action ); // 单独同步文件夹
+		server.sync( action, source ); // 单独同步文件夹
 		
 		File target = new File( basepath2 + "/b/");
 		
