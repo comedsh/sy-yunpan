@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 import org.shangyang.yunpan.directory.FileAction;
@@ -20,8 +22,6 @@ public class Client {
 	static Client c = null;
 	
 	String basePath = "/Users/mac/Documents/OneDrive/"; 
-	
-	String tmpdir = "";
 	
 	FileDifference differ = ServiceLoader.load( FileDifference.class ).iterator().next();
 	
@@ -137,6 +137,33 @@ public class Client {
 		return false;
 		
 	}
+
+	public static void main(String[] args){
+		
+		Timer timer = new Timer();
+		
+		timer.schedule(new TimerTask(){
+
+			@Override
+			public void run() {
+				
+				Client client = new Client();
+				
+				try {
+					
+					client.sync();
+					
+				} catch (Exception e) {
+					
+					e.printStackTrace();
+				}
+				
+				
+			}
+			
+		}, 1000, 1000 * 60 * 5); // 每隔五分钟执行一次，如果上一次的 scheduler 没有完成，则等待。
+		
+	}
 	
 	public String getBasePath() {
 		
@@ -146,14 +173,6 @@ public class Client {
 	public void setBasePathPath(String basePath) {
 		
 		this.basePath = basePath;
-	}
-
-	public String getTmpdir() {
-		return tmpdir;
-	}
-
-	public void setTmpdir(String tmpdir) {
-		this.tmpdir = tmpdir;
 	}
 	
 }
