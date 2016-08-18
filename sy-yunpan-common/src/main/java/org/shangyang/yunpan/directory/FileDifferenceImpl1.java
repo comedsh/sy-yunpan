@@ -1,9 +1,11 @@
 package org.shangyang.yunpan.directory;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -68,7 +70,7 @@ public class FileDifferenceImpl1 implements FileDifference{
 			for( FileDTO t : targets ){
 				
 				// special case for Directory only, 
-				// 1, if T is sub dir of S, then delete all the sub dirs. 
+				// 1, if T is sub dir of S, then delete all the sub dirs. ( T represents Target directories, S represents Source directories )
 				// 2. if totally matches, do nothing. 
 				// 3. if S is sub dir of T, insert s.  
 				if( s.isDirectory() ){
@@ -77,12 +79,16 @@ public class FileDifferenceImpl1 implements FileDifference{
 					if( t.getRelativePath().startsWith( s.getRelativePath() ) ){
 						
 						// #1 indicates the current t dir has sub dirs against s
-						if( t.getRelativePath().replaceAll(s.getRelativePath(), "").length() > 0 ){
+						
+						// String remain = t.getRelativePath().replace(s.getRelativePath(), ""); // replace replaceAll, replace() is works.
+						String remain = StringUtils.removeEnd(t.getRelativePath(), s.getRelativePath());
+						
+						// 有剩余部分，且剩余部分必须是 directory, fix the #v0.0.1 bug1
+						if( remain.length() >0  && remain.startsWith( File.separator ) ) {
 						
 							actions.add( new FileAction( s, ActionEnum.DELETE, TargetEnum.SERVER ) );
-							
 						}
-						
+
 						// #2 means totally matches
 						
 						// if #1 and #2 cases that means found the matched t. 

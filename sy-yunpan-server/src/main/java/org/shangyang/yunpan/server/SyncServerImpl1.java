@@ -28,7 +28,7 @@ public class SyncServerImpl1 implements SyncServer {
 		
 		long start = System.currentTimeMillis();
 		
-		logger.debug("start to check the server file system");
+		logger.debug("start to check the server file system, " + Repository.getInstance().getSyncBase() );
 		
 		List<FileDTO> files = FileChecker.getInstance().check( new File( Repository.getInstance().getSyncBase() ) );
 		

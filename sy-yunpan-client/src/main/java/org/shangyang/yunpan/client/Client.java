@@ -155,7 +155,7 @@ public class Client {
 		
 		long start = System.currentTimeMillis();
 		
-		logger.debug("start to check the client file system");
+		logger.debug("start to check the client file system, "+basePath);
 		
 		List<FileDTO> files = FileChecker.getInstance().check( new File( basePath ) );
 		

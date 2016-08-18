@@ -78,8 +78,6 @@ public class ClientTrayIcon {
 			
 			trayIcon = new TrayIcon(image);
 			
-			trayIcon.setImageAutoSize(true);
-			
 			trayIcon.setToolTip("微云云盘");
 			
 			trayIcon.setPopupMenu( popupMenu );
@@ -183,12 +181,12 @@ public class ClientTrayIcon {
 		
 		String iconpath = RELATIVEPATH1 + path;
 		
-		logger.debug("icon path:" + iconpath);
+		//logger.debug("icon path:" + iconpath);
 		
 		if( !new File(iconpath).exists() ){
 			
 			iconpath = RELATIVEPATH2 + path;
-			logger.debug("icon path:" + iconpath);
+			//logger.debug("icon path:" + iconpath);
 		}
 		
 		return iconpath;
