@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="sy-yunpan-client" default="default" basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
-
+	
+<!--
+<property name="java.home" value="/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home"/>	
+<property name="jre.home" value="/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/jre"/>
+-->
+	
 <target name="default">
 </target>
 	
 <target name="distMac">
 
-      <taskdef resource="com/sun/javafx/tools/ant/antlib.xml" uri="javafx:com.sun.javafx.tools.ant" classpath="${java.home}\..\lib\ant-javafx.jar"/>
-	
+	  <echo>jre.home: ${jre.home}</echo>
 	  <echo>java.home: ${java.home}</echo>
 	  <echo>basedir: ${basedir}</echo>
-	
+		
+	  <!--
+	  	java.home can be changed from eclipse.ini through the -vm variable as below, line break is needed 
+	    -vm
+		/Library/java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/bin/java
+	  -->
+	  <taskdef resource="com/sun/javafx/tools/ant/antlib.xml" uri="javafx:com.sun.javafx.tools.ant" classpath="${java.home}\..\lib\ant-javafx.jar"/>
+      
       <fx:deploy 
       		nativeBundles="dmg" 
       		outdir="${basedir}/build/install/out" 
@@ -18,10 +29,9 @@
       
             <fx:info title="yunpan" vendor="ShangYang" description="The 0.0.1 version beginning"/>
             
-            <fx:application name="yunpan" mainClass="org.shangyang.yunpan.client.Client">
-            	<fx:argument>-bundlesMyDir=mydir</fx:argument>
-           	</fx:application>
+            <fx:application name="yunpan" mainClass="org.shangyang.yunpan.client.Client"/>
       		
+      		<!-- 对应 command line 中的 srcdir -->
             <fx:resources>
 				<fx:fileset dir="${basedir}/build/install/sy-yunpan-client/lib" />
 				<fx:fileset dir="${basedir}/build/install/sy-yunpan-client/res" />

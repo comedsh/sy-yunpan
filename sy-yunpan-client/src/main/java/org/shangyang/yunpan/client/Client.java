@@ -33,7 +33,7 @@ public class Client {
 		
 		fixpath();
 		
-		System.setProperty("logpath", "/Users/mac/Desktop" );  // so the log4j can dynamic read the ${logpath}
+		System.setProperty("logpath", "/Users/mac/Desktop/yunpan-log" );  // so the log4j can dynamic read the ${logpath}
 		
 		logger = Logger.getLogger(Client.class); // Do notice that, Logger 如果想用系统环境变量作为参数值，必须在 System.setProperties 之后		
 		
@@ -62,7 +62,8 @@ public class Client {
 	/**
 	 * for the mac app, the system property of user.dir results not correct, this method try to fix it up. 
 	 * 
-	 * the current path of mac should be like /Users/mac/Desktop/yunpan.app/Contents, and the java.library.path is the most approach to it.
+	 * the current path of mac should be like /Users/mac/Desktop/yunpan.app/Contents, and the java.library.path is the most approach to it, and this is only works for jdk1.7, 
+	 * the path of jdk1.8 get changed.
 	 * 
 	 */
 	private static void fixpath(){
@@ -71,7 +72,8 @@ public class Client {
 		// if fixed, decided by the vm parameter set from the javapackager configuration. 
 		
 		if( StringUtils.equals( System.getProperty("fixpath"), "true") ){
-		
+			
+			// FIXME, 下面这个方式只有在 JDK1.7 才有效，如果是 JDK1.8，java.library.path 变了
 			System.setProperty("user.dir", StringUtils.removeEnd( System.getProperty("java.library.path"), "/Java" ) );
 		
 		}

@@ -46,44 +46,58 @@ public class ClientTrayIcon {
 		
 	}
 	
+	public ClientTrayIcon(){
+		
+		try{
+			
+			PopupMenu popupMenu = new PopupMenu();
+			
+			MenuItem menuItem = new MenuItem();
+			
+			popupMenu.setLabel("PopupMenu");
+			
+			menuItem.setLabel("退出");
+			
+			menuItem.addActionListener(new ActionListener() {
+				
+				public void actionPerformed(ActionEvent evt) {
+					
+					System.exit(0);
+					
+					logger.debug("the system gets existed via commands of the user");
+					
+				}
+				
+			});
+			
+			popupMenu.add(menuItem);		
+			
+			SystemTray systemTray = SystemTray.getSystemTray();
+			
+			BufferedImage image = ImageIO.read( new File( getIconPath("trayicon.tiff") ) );
+			
+			trayIcon = new TrayIcon(image);
+			
+			trayIcon.setImageAutoSize(true);
+			
+			trayIcon.setToolTip("微云云盘");
+			
+			trayIcon.setPopupMenu( popupMenu );
+			
+			systemTray.add( trayIcon );
+			
+		}catch(Exception e){
+			
+			throw new RuntimeException(e);
+		}
+	}
+	
 	
 	public void init() throws Exception{
 		
-		PopupMenu popupMenu = new PopupMenu();
-		
-		MenuItem menuItem = new MenuItem();
-		
-		popupMenu.setLabel("PopupMenu");
-		
-		menuItem.setLabel("退出");
-		
-		menuItem.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent evt) {
-				
-				System.exit(0);
-				
-				logger.debug("the system gets existed via commands of the user");
-				
-			}
-			
-		});
-		
-		popupMenu.add(menuItem);		
-		
-		SystemTray systemTray = SystemTray.getSystemTray();
-		
 		BufferedImage image = ImageIO.read( new File( getIconPath("trayicon.tiff") ) );
 		
-		trayIcon = new TrayIcon(image);
-		
-		trayIcon.setImageAutoSize(true);
-		
-		trayIcon.setToolTip("微云云盘");
-		
-		trayIcon.setPopupMenu( popupMenu );
-		
-		systemTray.add( trayIcon );
+		trayIcon.setImage( image );
 		
 	}
 	

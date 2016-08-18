@@ -1,5 +1,9 @@
 apply plugin: 'application'
 
+sourceCompatibility = 1.7
+
+version = '0.0.1'
+
 mainClassName = "org.shangyang.yunpan.client.Client"
 
 jar {
@@ -31,6 +35,9 @@ distributions {
         	
 		 	into('res') {
  	        	from { project(':sy-yunpan-server').buildDir.path + '/classes/main/' }
+ 	        	from { project(':sy-yunpan-server').buildDir.path + '/resources/main/' }
+ 	        	// the server log4j should be excluded
+ 	        	exclude 'log4j.properties'
             	fileMode = 0755
           	}
           	

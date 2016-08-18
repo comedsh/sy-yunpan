@@ -46,7 +46,7 @@ public class Repository {
 		String basepath;
 		
 		if( StringUtils.isEmpty( getBasePath() ) ){
-		
+			
 			basepath = read("basepath", this.getClass().getResourceAsStream("/repository.properties"), "UTF-8");
 
 		}else{

@@ -98,7 +98,7 @@ class MyClassLoader extends URLClassLoader{
 				// mac app server classpath
 				if( !new File(serverClasspath).exists() ){
 					
-					serverClasspath = System.getProperty("user.dir") + "/java/";
+					serverClasspath = System.getProperty("user.dir") + "/Java/";
 				}
 				
 				// windows app server classpath..
