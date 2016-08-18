@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -117,6 +118,26 @@ public class FileCommonTest {
 		dir.setLastModified(System.currentTimeMillis() - 1000000 );
 		
 		System.out.println( dir.lastModified() );
+	}
+	
+	@Test
+	public void testAbsolutePath() throws Exception{
+		
+		System.out.println(System.getProperty("user.dir"));
+		
+		System.out.println(System.getProperty("java.class.path"));
+		
+		System.out.println(Object.class.getResource("/org/shangyang/yunpan/directory/FileCommonTest.class").getPath()); 
+		
+		System.out.println( "/Users/mac/Desktop/sy-yunpan.app/Contents/MacOS/lib/sy-yunpan-client-0.0.1.jar".replace(".*lib.*jar", "") );
+		
+	}
+	
+	@Test
+	public void testSystemProperties(){
+		
+		System.getProperties().list(System.out);
+		
 	}
 	
 }

@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.shangyang.yunpan.directory.FileAction;
 import org.shangyang.yunpan.directory.FileDTO;
@@ -29,6 +30,8 @@ public class SyncServerRemoteImpl1 implements SyncServer{
 			instance = clazz.newInstance();
 			
 		} catch (Exception e) {
+			
+			logger.error( e.fillInStackTrace() );
 			
 			throw new RuntimeException(e);
 		}
@@ -88,14 +91,17 @@ class MyClassLoader extends URLClassLoader{
 				String serverClasspath;
 	
 				// 特别注明：必须要有最后的那根斜杠，否则会报错，为什么必须要有这根斜杠？难道没有这根斜杠 ClassLoader 不会认为它是一个目录？
-				serverClasspath = new File(".").getCanonicalPath().replaceAll("sy-yunpan-client", "sy-yunpan-server") + "/bin/";
 				
+				// eclipse server classpath
+				serverClasspath = StringUtils.removeEnd( System.getProperty("user.dir"), "sy-yunpan-client") + "/sy-yunpan-server/bin/";
+				
+				// mac app server classpath
 				if( !new File(serverClasspath).exists() ){
 					
-					serverClasspath = new File(".").getCanonicalPath() + "/";
+					serverClasspath = System.getProperty("user.dir") + "/java/";
 				}
 				
-				SyncServerRemoteImpl1.logger.debug( "serverClasspath:" + serverClasspath );
+				// windows app server classpath..
 				
 				URL url = new URL("file://" + serverClasspath );
 				

@@ -1,10 +1,7 @@
 allprojects {
 	apply plugin: 'java'
 	apply plugin: 'eclipse'
-	apply plugin: 'application'
 
-	mainClassName = "org.shangyang.yunpan.client.Client"
-	
 	// group will translate to groupId during pom generation and deployment
 	group = 'org.shangyang.yunpan'
 
@@ -14,7 +11,7 @@ allprojects {
 	
 	jar {
 	    manifest {
-	        attributes 'Implementation-Title': 'Gradle Quickstart',
+	        attributes 'Implementation-Title': 'org.shangyang.yunpan',
 	                   'Implementation-Version': version
 	    }
 	}

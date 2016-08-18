@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="sy-yunpan-client" default="default" basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
+
+<target name="default">
+</target>
+	
+<target name="distMac">
+
+      <taskdef resource="com/sun/javafx/tools/ant/antlib.xml" uri="javafx:com.sun.javafx.tools.ant" classpath="${java.home}\..\lib\ant-javafx.jar"/>
+	
+	  <echo>java.home: ${java.home}</echo>
+	  <echo>basedir: ${basedir}</echo>
+	
+      <fx:deploy 
+      		nativeBundles="dmg" 
+      		outdir="${basedir}/build/install/out" 
+      		outfile="yunpan">
+      
+            <fx:info title="yunpan" vendor="ShangYang" description="The 0.0.1 version beginning"/>
+            
+            <fx:application name="yunpan" mainClass="org.shangyang.yunpan.client.Client">
+            	<fx:argument>-bundlesMyDir=mydir</fx:argument>
+           	</fx:application>
+      		
+            <fx:resources>
+				<fx:fileset dir="${basedir}/build/install/sy-yunpan-client/lib" />
+				<fx:fileset dir="${basedir}/build/install/sy-yunpan-client/res" />
+            </fx:resources>
+			
+      		<!--
+            <fx:preferences install="true" shortcut="true" />
+      		-->
+      	
+      		<!--
+      		
+	      		sample to set the jvm args..  
+	      		
+				<fx:platform javafx="2.1+">
+				    <fx:jvmarg value="-Xmx400m"/>
+				    <fx:jvmarg value="-verbose:jni"/>
+				    <property name="purpose" value="sample value"/>
+				</fx:platform>      		
+				
+				the jvmarg setting results
+				fetching from system properties: key:-Xmx400m; value: 
+				fetching from vm properties: -Xmx400m		
+				
+				the <property> setting results
+				fetching from system properties: key:purpose; value: sample value
+				fetching from vm properties: -Dpurpose=sample value				
+      	
+      		-->
+      	
+	      	<fx:platform javafx="2.1+">
+	      	    <property name="basedir" value="${basedir}"/>
+	      	</fx:platform>
+      </fx:deploy>
+
+</target>
+
+</project>

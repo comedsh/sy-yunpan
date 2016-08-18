@@ -2,10 +2,14 @@ package org.shangyang.yunpan.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.shangyang.yunpan.directory.FileAction;
 import org.shangyang.yunpan.directory.FileChecker;
@@ -26,6 +30,8 @@ public class Client {
 	static Logger logger = null;
 	
 	static{
+		
+		fixpath();
 		
 		System.setProperty("logpath", "/Users/mac/Desktop" );  // so the log4j can dynamic read the ${logpath}
 		
@@ -52,6 +58,83 @@ public class Client {
 		return c;
 		
 	}
+
+	/**
+	 * for the mac app, the system property of user.dir results not correct, this method try to fix it up. 
+	 * 
+	 * the current path should be like /Users/mac/Desktop/yunpan.app/Contents
+	 * 
+	 */
+	private static void fixpath(){
+		
+		System.setProperty("user.dir", StringUtils.removeEnd( System.getProperty("java.library.path"), "/Java" ) );
+		
+	}
+	
+	public static void main(String[] args){
+		
+//		Timer timer = new Timer();
+//		
+//		timer.schedule(new TimerTask(){
+//
+//			@Override
+//			public void run() {
+//				
+//				try {
+//					
+//					long start = System.currentTimeMillis(); 
+//					
+//					logger.debug("start sync");
+//					
+//					 Client.getInstance().sync();
+//					
+//					logger.debug("sync completed, current tiemstamp, time spent " + ( System.currentTimeMillis() - start ) / 1000 + " seconds ");
+//					
+//				} catch (Exception e) {
+//					
+//					e.printStackTrace();
+//				}
+//				
+//				
+//			}
+//			
+//		}, 1000, 1000 * 60 * 5); // 每隔五分钟执行一次，如果上一次的 scheduler 没有完成，则等待。shit，它是以上次开始执行的时间来计算的....
+		
+		inspectSystem(args);
+		
+		while(true){
+			
+			try{
+				
+				long start = System.currentTimeMillis(); 
+				
+				logger.debug("start sync");
+				
+				 Client.getInstance().sync();
+				
+				logger.debug("sync completed, current tiemstamp, time spent " + ( System.currentTimeMillis() - start ) / 1000 + " seconds ");
+				
+			}catch(Exception e){
+			
+				logger.error(e.getMessage(), e);
+				
+			}finally{
+				
+				try {
+					
+					TimeUnit.SECONDS.sleep(300);
+
+				} catch (InterruptedException e) {
+					
+					e.printStackTrace();
+				} 
+				
+			}
+		}
+				
+		
+	}
+	
 	
 	public List<FileDTO> check(){
 		
@@ -165,60 +248,6 @@ public class Client {
 		
 	}
 
-	public static void main(String[] args){
-		
-//		Timer timer = new Timer();
-//		
-//		timer.schedule(new TimerTask(){
-//
-//			@Override
-//			public void run() {
-//				
-//				try {
-//					
-//					long start = System.currentTimeMillis(); 
-//					
-//					logger.debug("start sync");
-//					
-//					 Client.getInstance().sync();
-//					
-//					logger.debug("sync completed, current tiemstamp, time spent " + ( System.currentTimeMillis() - start ) / 1000 + " seconds ");
-//					
-//				} catch (Exception e) {
-//					
-//					e.printStackTrace();
-//				}
-//				
-//				
-//			}
-//			
-//		}, 1000, 1000 * 60 * 5); // 每隔五分钟执行一次，如果上一次的 scheduler 没有完成，则等待。shit，它是以上次开始执行的时间来计算的....
-		
-		while(true){
-			
-			try{
-				
-				long start = System.currentTimeMillis(); 
-				
-				logger.debug("start sync");
-				
-				 Client.getInstance().sync();
-				
-				logger.debug("sync completed, current tiemstamp, time spent " + ( System.currentTimeMillis() - start ) / 1000 + " seconds ");
-				
-				TimeUnit.SECONDS.sleep(300); // every 300 seconds executed once.
-				
-			}catch(Exception e){
-			
-				e.printStackTrace();
-				
-			}
-		}
-		
-		
-		
-	}
-	
 	public String getBasePath() {
 		
 		return basePath;
@@ -227,6 +256,52 @@ public class Client {
 	public void setBasePathPath(String basePath) {
 		
 		this.basePath = basePath;
+	}
+	
+	/**
+	 * 
+	 * @param args main args
+	 */
+	private static void inspectSystem(String args[]){
+
+		logger.debug("========================== inspecting the arguments start =================================");
+		
+		for( String arg : args ){
+			
+			logger.debug("args:" + arg);
+			
+		}
+		
+		logger.debug("========================== inspecting the arguments end =================================");
+		
+
+		logger.debug( "================================ inspecting System Properties ================================" );
+		
+		Enumeration<Object> keys = System.getProperties().keys();
+		
+		while( keys.hasMoreElements() ){
+		
+			String key = (String) keys.nextElement();
+			
+			logger.debug( "key:" + key + "; value: "+ System.getProperties().get( key ) );
+		}
+		
+		logger.debug( "================================ System Properties searching end ================================" );
+		
+		logger.debug( "================================ inspecting VM Properties start ================================" );
+		
+		RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
+		
+		List<String> aList = bean.getInputArguments();
+
+		for (int i = 0; i < aList.size(); i++) {
+		
+			logger.debug( aList.get( i ) );
+			
+		}
+		
+		logger.debug( "================================ inspecting VM Properties end ================================" );
+		
 	}
 	
 }

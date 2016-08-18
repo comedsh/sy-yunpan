@@ -1,22 +1,62 @@
+apply plugin: 'application'
+
+mainClassName = "org.shangyang.yunpan.client.Client"
+
 jar {
+
+	def tree = project.fileTree('build/install/sy-yunpan-client/lib')
+	
+	def classpath=''
+	
+	tree.each {File file ->
+	    println classpath += file.name +' '
+	}
+
     manifest {
-        attributes 'Implementation-Title': 'Gradle Quickstart',
-                   'Implementation-Version': version
+        attributes 'Implementation-Title': 'org.shangyang.yunpan',	
+                   'Implementation-Version': version,
+        		   'Main-Class': 'org.shangyang.yunpan.client.Client',
+        		   'Class-Path': classpath
+
     }
 }
 
 // http://stackoverflow.com/questions/17709707/gradle-multi-project-distribution
 // 特别注意，如果要导出 sy-yunpan-server 中的相应内容，记得一定要先 build sy-yunpan-server 是它生成 /build/classes/main classes 文件.
 distributions {
+
     main {
+    
         contents {
-		 	into('bin') {
- 	           from { project(':sy-yunpan-server').buildDir.path + '/classes/main' }
-               fileMode = 0755
-            }
+        	
+		 	into('res') {
+ 	        	from { project(':sy-yunpan-server').buildDir.path + '/classes/main/' }
+            	fileMode = 0755
+          	}
+          	
+ //         	into('.'){
+//          		from { project.buildDir.path + '/libs/' }
+//          		fileMode = 0755
+//          	}
+          	
          }
     }
 }
+
+//======================> javapackager start
+
+ant.importBuild 'dist_mac.xml'
+
+//task distMac(type: Exec) {
+//    executable 'sh'
+//    args "-c","./dist_mac.sh"
+    
+    //directly execute the command line
+    //resluts /Users/mac/workspace/mine/yunpan/sy-yunpan/sy-yunpan-client
+    //commandLine "PWD"
+//}
+
+//======================> javapackager end
 
 repositories {
     mavenCentral()
