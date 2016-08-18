@@ -52,7 +52,7 @@
       		-->
       	
 	      	<fx:platform javafx="2.1+">
-	      	    <property name="basedir" value="${basedir}"/>
+	      	    <property name="fixpath" value="true"/>
 	      	</fx:platform>
       </fx:deploy>
 

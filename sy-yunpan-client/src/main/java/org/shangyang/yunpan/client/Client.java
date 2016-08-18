@@ -62,12 +62,19 @@ public class Client {
 	/**
 	 * for the mac app, the system property of user.dir results not correct, this method try to fix it up. 
 	 * 
-	 * the current path should be like /Users/mac/Desktop/yunpan.app/Contents
+	 * the current path of mac should be like /Users/mac/Desktop/yunpan.app/Contents, and the java.library.path is the most approach to it.
 	 * 
 	 */
 	private static void fixpath(){
 		
-		System.setProperty("user.dir", StringUtils.removeEnd( System.getProperty("java.library.path"), "/Java" ) );
+		
+		// if fixed, decided by the vm parameter set from the javapackager configuration. 
+		
+		if( StringUtils.equals( System.getProperty("fixpath"), "true") ){
+		
+			System.setProperty("user.dir", StringUtils.removeEnd( System.getProperty("java.library.path"), "/Java" ) );
+		
+		}
 		
 	}
 	
@@ -110,13 +117,19 @@ public class Client {
 				
 				logger.debug("start sync");
 				
-				 Client.getInstance().sync();
+				ClientTrayIcon.getInstance().init();
+				
+				Client.getInstance().sync();
+				
+				ClientTrayIcon.getInstance().stop();
 				
 				logger.debug("sync completed, current tiemstamp, time spent " + ( System.currentTimeMillis() - start ) / 1000 + " seconds ");
 				
 			}catch(Exception e){
 			
 				logger.error(e.getMessage(), e);
+				
+				ClientTrayIcon.getInstance().error();
 				
 			}finally{
 				
@@ -151,6 +164,8 @@ public class Client {
 	}
 	
 	public void sync() throws Exception{
+		
+		ClientTrayIcon.getInstance().rotate();
 		
 		List<FileDTO> snapshot1 = this.check();
 		
