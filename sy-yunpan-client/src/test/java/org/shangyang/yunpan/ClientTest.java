@@ -81,7 +81,7 @@ public class ClientTest {
 		
 		client.setBasePathPath(basepath1);
 		
-		setServerBasePath(syncServer, basepath3);
+		Client.setServerBasePath(syncServer, basepath3);
 			
 		client.sync(); 
 		
@@ -104,7 +104,7 @@ public class ClientTest {
 		
 		client.setBasePathPath(basepath1);
 		
-		setServerBasePath(syncServer, basepath2);
+		Client.setServerBasePath(syncServer, basepath2);
 		
 		client.sync();
 		
@@ -139,16 +139,6 @@ public class ClientTest {
 		
 	}
 	
-	void setServerBasePath( SyncServer syncServer, String basepath ) throws Exception{
-		
-		ClassLoader cl = (ClassLoader) syncServer.getClass().getDeclaredMethod("getClassLoader").invoke(syncServer, (Object[])null );
-		
-		Class<?> clazz = cl.loadClass("org.shangyang.yunpan.server.Repository");
-		
-		Object instance = clazz.getDeclaredMethod("getInstance").invoke(null, (Object[]) null);
-		
-		clazz.getDeclaredMethod("setBasePath", String.class ).invoke(instance, basepath );
-		
-	}
+
 	
 }

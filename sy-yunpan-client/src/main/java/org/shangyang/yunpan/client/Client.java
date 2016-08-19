@@ -42,6 +42,15 @@ public class Client {
 	static Client c = null;
 	
 	String basePath = "/Users/mac/Documents/OneDrive/"; 
+
+	// only processes on the production env.
+	static String[][] SYNCPATHS = new String[][]{		
+		{"/Users/mac/Documents/OneDrive/", "/Volumes/Elements/百度云同步盘/OneDrive/"},
+		{"/Users/mac/workspace/", "/Volumes/Elements/百度云同步盘/workspace/"},
+		{"/Users/mac/programs/", "/Volumes/Elements/百度云同步盘/programs/"} };
+		
+	// index for SYNPATHS	
+	static int SYNCPOS = 0;
 	
 	FileDifference differ = ServiceLoader.load( FileDifference.class ).iterator().next();
 	
@@ -71,7 +80,7 @@ public class Client {
 		
 		// if fixed, decided by the vm parameter set from the javapackager configuration. 
 		
-		if( StringUtils.equals( System.getProperty("fixpath"), "true") ){
+		if( StringUtils.equals( System.getProperty("fixpath"), "true") && StringUtils.equals( System.getProperty("platform"), "mac") ){
 			
 			// FIXME, 下面这个方式只有在 JDK1.7 才有效，如果是 JDK1.8，java.library.path 变了
 			System.setProperty("user.dir", StringUtils.removeEnd( System.getProperty("java.library.path"), "/Java" ) );
@@ -109,6 +118,8 @@ public class Client {
 //			
 //		}, 1000, 1000 * 60 * 5); // 每隔五分钟执行一次，如果上一次的 scheduler 没有完成，则等待。shit，它是以上次开始执行的时间来计算的....
 		
+		// System.setProperty("platform", "mac"); // the the production execution switcher from Eclipse.
+		
 		inspectSystem(args);
 		
 		while(true){
@@ -120,6 +131,8 @@ public class Client {
 				logger.debug("start sync");
 				
 				ClientTrayIcon.getInstance().init();
+				
+				Client.getInstance().prepareProduction();
 				
 				Client.getInstance().sync();
 				
@@ -137,7 +150,8 @@ public class Client {
 				
 				try {
 					
-					TimeUnit.SECONDS.sleep(300);
+					// SYNCPOS == 0 for the production process check, make sure only sleep after all the SYNCPATHS get processed.
+					if( SYNCPOS == 0 ) TimeUnit.SECONDS.sleep(300);
 
 				} catch (InterruptedException e) {
 					
@@ -150,7 +164,26 @@ public class Client {
 		
 	}
 	
-	
+	// multiple folder sync support, and so far only works for the production environment.
+	// the vm parameter platform was set from dist_mac.xml
+	private void prepareProduction() throws Exception {
+		
+		if( StringUtils.equals( System.getProperty("platform"), "mac" ) ) {
+			
+			basePath = SYNCPATHS[ SYNCPOS ][0];
+			
+			String targetBasePath = SYNCPATHS[ SYNCPOS ][1];
+			
+			Client.setServerBasePath( syncServer, targetBasePath );
+			
+			SYNCPOS ++;
+			
+			if( SYNCPOS == 3 ) SYNCPOS = 0;
+			
+		}
+		
+	}
+
 	public List<FileDTO> check(){
 		
 		long start = System.currentTimeMillis();
@@ -175,7 +208,7 @@ public class Client {
 		
 		List<FileAction> actions = differ.difference( snapshot1, snapshot2 );
 		
-		logger.debug("Totolly " + actions +" actions needs to process ");
+		logger.debug("Totolly " + actions.size() +" actions needs to process ");
 		
 		int number = 0;
 		
@@ -318,6 +351,18 @@ public class Client {
 		}
 		
 		logger.debug( "================================ inspecting VM Properties end ================================" );
+		
+	}
+	
+	public static void setServerBasePath( SyncServer syncServer, String basepath ) throws Exception{
+		
+		ClassLoader cl = (ClassLoader) syncServer.getClass().getDeclaredMethod("getClassLoader").invoke(syncServer, (Object[])null );
+		
+		Class<?> clazz = cl.loadClass("org.shangyang.yunpan.server.Repository");
+		
+		Object instance = clazz.getDeclaredMethod("getInstance").invoke(null, (Object[]) null);
+		
+		clazz.getDeclaredMethod("setBasePath", String.class ).invoke(instance, basepath );
 		
 	}
 	
