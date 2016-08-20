@@ -1,6 +1,6 @@
 package org.shangyang.yunpan.directory;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,7 +11,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,10 +19,27 @@ public class FileCommonTest {
 
 	static String rootpath;
 	
+	static String basepath1;
+	
+	static String basepath2;
+	
 	@BeforeClass
 	public static void beforeClass() throws IOException{
 		
-		rootpath = new File(".").getCanonicalPath();
+		rootpath = new File(".").getCanonicalPath() + "/src/test/resources/";
+		
+		basepath1 = rootpath + "/dir1/";
+		
+		basepath2 = rootpath + "/dir2/";
+		
+	}
+	
+	@Before
+	public void before() throws Exception{
+		
+		TestUtils.cleanupTestCases1(rootpath);		
+		
+		TestUtils.makeupTestCases1(rootpath);
 		
 	}
 	
@@ -36,7 +53,7 @@ public class FileCommonTest {
 	@Test
 	public void testReadWhenWriting() throws IOException{
 		
-		File file = new File( rootpath + "/src/test/resources/test.txt" );
+		File file = new File( rootpath + "test.txt" );
 		
 		assertTrue( file.exists() );
 		
@@ -50,7 +67,7 @@ public class FileCommonTest {
 			System.out.println(line);
 		}
 		
-		file = new File( rootpath + "/src/test/resources/test.docx" );
+		file = new File( rootpath + "test.docx" );
 		
 		reader = new BufferedReader( new FileReader(file) );
 		
@@ -76,7 +93,7 @@ public class FileCommonTest {
 	@Test
 	public void testIsFileOpening() throws IOException{
 		
-		File file = new File( rootpath + "/src/test/resources/test.txt" );
+		File file = new File( rootpath + "test.txt" );
 		
 		@SuppressWarnings("resource")
 		FileOutputStream fos = new FileOutputStream( file );
@@ -102,11 +119,11 @@ public class FileCommonTest {
 	@Test
 	public void testDirectory() throws Exception{
 		
-		String filepath = StringUtils.removeEnd(new File(".").getCanonicalPath(), ".") + "/src/test/resources/dir1/d/";
+		String filepath = basepath1;
 		
 		if( new File(filepath).exists() ) new File(filepath).delete();
 		
-		TestUtils.createFile(filepath, null);
+		TestUtils.createFile(filepath, null, null);
 		
 		File dir = new File(filepath);
 		
@@ -117,6 +134,26 @@ public class FileCommonTest {
 		dir.setLastModified(System.currentTimeMillis() - 1000000 );
 		
 		System.out.println( dir.lastModified() );
+	}
+	
+	/**
+	 * What? 原来删除会改变 parent folder 的 last modifications.... 
+	 * 
+	 * 这让我决定，不根据 folder 的 last modification 来构建 UPDATE File Action 了，没意义。
+	 */
+	@Test
+	public void testLastModification(){
+		
+		File b1 = new File( basepath1 + "b" );
+		File b2 = new File( basepath2 + "b" );
+		File b2f = new File( basepath2 + "b/b.txt" );
+		
+		assertTrue( b1.lastModified() == b2.lastModified() );
+		
+		b2f.delete();
+		
+		assertFalse("which I espected as true", b1.lastModified() == b2.lastModified() );
+		
 	}
 	
 	@Test

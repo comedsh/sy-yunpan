@@ -44,10 +44,8 @@ public class ClientTest {
 		// remove the current path indicator "." from Linux System
 		rootpath = StringUtils.removeEnd(new File(".").getCanonicalPath(), ".") + "/src/test/resources/";
 		
-		basepath1 = rootpath + "dir1/";
-		
-		basepath2 = rootpath + "dir2/";
-		
+		basepath1 = rootpath + "dir1/";		
+		basepath2 = rootpath + "dir2/";		
 		basepath3 = rootpath + "dir3/"; 
 			
 	}
@@ -55,13 +53,9 @@ public class ClientTest {
 	@Before
 	public void before() throws Exception{
 		
-//		FileUtils.forceDeleteOnExit( new File( basepath3 ) );
-		
 		TestUtils.cleanupTestCases1(rootpath);		
 		
 		TestUtils.makeupTestCases1(rootpath);
-		
-		FileUtils.forceMkdir( new File( basepath3 ) );
 		
 		client = Client.getInstance();
 		
@@ -98,6 +92,7 @@ public class ClientTest {
 	 * 
 	 * 有趣的是，某些操作，特别是与文件夹相关的 case，往往需要两步或者更多步骤完成同步，详情参考 {@link TestUtils#makeupTestCases1(String) }
 	 * 
+	 * 
 	 */
 	@Test
 	public void testSync2() throws Exception{
@@ -118,7 +113,7 @@ public class ClientTest {
 		
 		List<FileAction> actions = differ.difference( source, target );
 		
-		assertTrue("dir2/b/b.txt and dir2/c/c1/c1.txt both takes 2 steps get synchronized", actions.size() == 2 );
+		assertTrue("dir2/c/c1/c1.txt both takes 2 steps get synchronized", actions.size() == 1 );
 		
 		assertTrue( FileUtils.readFileToString( new File(basepath2+"/a/a.txt"), "UTF-8" ).equals("a") );
 

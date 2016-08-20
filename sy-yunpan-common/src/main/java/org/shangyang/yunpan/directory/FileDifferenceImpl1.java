@@ -68,43 +68,9 @@ public class FileDifferenceImpl1 implements FileDifference{
 			boolean found = false;
 			
 			for( FileDTO t : targets ){
-				
-				// special case for Directory only, 
-				// 1, if T is sub dir of S, then delete all the sub dirs. ( T represents Target directories, S represents Source directories )
-				// 2. if totally matches, do nothing. 
-				// 3. if S is sub dir of T, insert s.  
-				if( s.isDirectory() ){
-					
-					// handles #1 and #2 above
-					if( t.getRelativePath().startsWith( s.getRelativePath() ) ){
-						
-						// #1 indicates the current t dir has sub dirs against s
-						
-						// String remain = t.getRelativePath().replace(s.getRelativePath(), ""); // replace replaceAll, replace() is works.
-						String remain = StringUtils.removeEnd(t.getRelativePath(), s.getRelativePath());
-						
-						// 有剩余部分，且剩余部分必须是 directory, fix the #v0.0.1 bug1
-						if( remain.length() >0  && remain.startsWith( File.separator ) ) {
-						
-							actions.add( new FileAction( s, ActionEnum.DELETE, TargetEnum.SERVER ) );
-						}
-
-						// #2 means totally matches
-						
-						// if #1 and #2 cases that means found the matched t. 
-						found = true;
-						
-						// temps.add( t ); // why not directly remove it from targets for saving performance?
-						
-						targets.remove( t );
-						
-						break;
-						
-						// then how about #3, if s has more sub dirs than t, this is the normal cases, will handles via the common flows. 
-					}				
 										
 				// resolve #1, if two file matches, compare with the status to decide the action needs to be took.
-				}else if( s.equals(t) ){
+				if( s.equals(t) ){
 					
 					FileAction a = genUpdateAction( s, t);
 					
@@ -117,6 +83,28 @@ public class FileDifferenceImpl1 implements FileDifference{
 					targets.remove( t );
 					
 					break;
+				}
+				
+				// special case for the directory leaf matches, 
+				// dir1/b/, dir2/b/b.txt; 如果不特殊处理，将会造成一个 /b 的 insert action，但是 /b 在 dir2 上是存在的，不应该被 insert ( b 是目录 )，导致概念很混乱。
+				// 所以，这里的情况其实就应该是找到了事，注意找的逻辑；提出 s 的共有部分，剩下的仍然是 Directory 的路径格式，便认为 /b 在 dir2 上存在。
+				// 当然，directory 也可以有 update 的情况... 这里不关心了，谁关心 directory 的 last modification. 这个问题交给 v3.1 版本去考虑实现吧。
+				if( s.isDirectory() ){
+					
+					if( t.getRelativePath().startsWith( s.getRelativePath() ) ){
+					
+						String remain = StringUtils.removeEnd( t.getRelativePath(), s.getRelativePath() );
+						
+						if( remain.length() > 0 && remain.startsWith( File.separator ) ){
+							
+							found = true;
+							
+							break;
+							
+						}
+					
+					}
+					
 				}
 				
 			}
@@ -201,6 +189,9 @@ public class FileDifferenceImpl1 implements FileDifference{
 	}
 	
 	private FileAction genUpdateAction( FileDTO s, FileDTO t ){
+		
+		// Directory 没必要进行任何的彼此更新，而且，有一个特性让我决定这么做，就是如果删除目录包含的子节点，那么相应的父类目录的更新时间也会随之改变。见 FileCommonTest#testLastModification()
+		if( s.isDirectory() ) return null; 
 		
 		FileAction a = null;
 		

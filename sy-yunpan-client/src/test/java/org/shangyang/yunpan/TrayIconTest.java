@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TrayIconTest {
@@ -31,6 +32,7 @@ public class TrayIconTest {
 	 * @throws InterruptedException 
 	 */
 	@Test
+	@Ignore
 	public void test1() throws AWTException, InterruptedException{
 		
 		final JFrame frame = new JFrame();
@@ -101,6 +103,7 @@ public class TrayIconTest {
 	 * @throws IOException 
 	 */
 	@Test
+	@Ignore
 	public void test2() throws InterruptedException, AWTException, IOException{
 
 		PopupMenu popupMenu1 = new PopupMenu();
@@ -178,13 +181,5 @@ public class TrayIconTest {
 		TimeUnit.SECONDS.sleep(40);
 		
 	}
-	
-	
-	@Test
-	public void test(){
-		int i=0;
-		System.out.println(++i);
-	}
-	
 
 }
